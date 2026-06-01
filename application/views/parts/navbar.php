@@ -50,7 +50,7 @@
                 <!-- Logo -->
                 <!-- <div class="d-block d-md-none">
         <a href="<?= base_url(); ?>">
-          <img src="<?= base_url(); ?>/assets/images/brand/logo/logo-icon.svg" alt="" />
+          <img src="<?= base_url(); ?>assets/images/brand/logo/logo-icon.svg" alt="" />
         </a>
       </div> -->
             </div>
@@ -110,12 +110,12 @@
                 <!-- Dropdown -->
                 <li class="ms-3 dropdown">
                     <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="<?= base_url(); ?>/assets/images/avatar/avatar_x.png" alt="" class="avatar avatar-sm rounded-circle" />
+                        <img src="<?= base_url(); ?>assets/images/avatar/avatar_x.png" alt="" class="avatar avatar-sm rounded-circle" />
                     </a>
                     <!-- <div class="dropdown-menu dropdown-menu-end dropdown-menu-md p-0">
                         <div>
                             <div class="d-flex gap-3 align-items-center border-dashed border-bottom px-4 py-4">
-                                <img src="<?= base_url(); ?>/assets/images/avatar/avatar_x.png" alt="" class="avatar avatar-md rounded-circle" />
+                                <img src="<?= base_url(); ?>assets/images/avatar/avatar_x.png" alt="" class="avatar avatar-md rounded-circle" />
                                 <div>
                                     <h4 class="mb-0 fs-5">Jitu Chauhan</h4>
                                     <p class="mb-0 text-secondar small">@imjituchauhan</p>
@@ -296,7 +296,7 @@
                         <a href="#" class="list-group-item list-group-item-action p-5 border-dashed border-bottom">
                             <div class="d-flex justify-content-between">
                                 <div class="d-flex gap-4 align-items-center">
-                                    <img src="<?= base_url(); ?>/assets/images/avatar/avatar_x.png" alt="" class="avatar avatar-md rounded-circle" />
+                                    <img src="<?= base_url(); ?>assets/images/avatar/avatar_x.png" alt="" class="avatar avatar-md rounded-circle" />
                                     <div class="d-flex flex-column gap-1">
                                         <div>AliceÂ uploaded a new profile picture.</div>
                                         <small class="text-secondary"> 1 hour ago</small>
@@ -315,7 +315,7 @@
                         <a href="#" class="list-group-item list-group-item-action p-5 border-dashed border-bottom">
                             <div class="d-flex justify-content-between">
                                 <div class="d-flex gap-4 align-items-center">
-                                    <img src="<?= base_url(); ?>/assets/images/avatar/avatar-2.jpg" alt="" class="avatar avatar-md rounded-circle" />
+                                    <img src="<?= base_url(); ?>assets/images/avatar/avatar-2.jpg" alt="" class="avatar avatar-md rounded-circle" />
                                     <div class="d-flex flex-column gap-1">
                                         <div>Mike sent you a friend request.</div>
                                         <small class="text-secondary"> 5 minutes ago</small>
@@ -338,7 +338,7 @@
                         <a href="#" class="list-group-item list-group-item-action p-5 border-dashed border-bottom">
                             <div class="d-flex justify-content-between">
                                 <div class="d-flex gap-4 align-items-center">
-                                    <img src="<?= base_url(); ?>/assets/images/avatar/avatar-3.jpg" alt="" class="avatar avatar-md rounded-circle" />
+                                    <img src="<?= base_url(); ?>assets/images/avatar/avatar-3.jpg" alt="" class="avatar avatar-md rounded-circle" />
                                     <div class="d-flex flex-column gap-1">
                                         <div>SophiaÂ commented on your post.</div>
                                         <small class="text-secondary"> 20 minutes ago</small>
@@ -450,7 +450,7 @@
                         <a href="#" class="list-group-item list-group-item-action p-5 border-dashed border-bottom">
                             <div class="d-flex justify-content-between">
                                 <div class="d-flex gap-4 align-items-center">
-                                    <img src="<?= base_url(); ?>/assets/images/avatar/avatar-3.jpg" alt="" class="avatar avatar-md rounded-circle" />
+                                    <img src="<?= base_url(); ?>assets/images/avatar/avatar-3.jpg" alt="" class="avatar avatar-md rounded-circle" />
                                     <div class="d-flex flex-column gap-1">
                                         <div>SophiaÂ commented on your post.</div>
                                         <small class="text-secondary"> 20 minutes ago</small>
@@ -633,7 +633,7 @@
                         <a href="#" class="list-group-item list-group-item-action p-5 border-dashed border-bottom">
                             <div class="d-flex justify-content-between">
                                 <div class="d-flex gap-4 align-items-center">
-                                    <img src="<?= base_url(); ?>/assets/images/avatar/avatar-3.jpg" alt="" class="avatar avatar-md rounded-circle" />
+                                    <img src="<?= base_url(); ?>assets/images/avatar/avatar-3.jpg" alt="" class="avatar avatar-md rounded-circle" />
                                     <div class="d-flex flex-column gap-1">
                                         <div>SophiaÂ commented on your post.</div>
                                         <small class="text-secondary"> 20 minutes ago</small>
@@ -781,7 +781,7 @@
                         <a href="#" class="list-group-item list-group-item-action p-5 border-dashed border-bottom">
                             <div class="d-flex justify-content-between">
                                 <div class="d-flex gap-4 align-items-center">
-                                    <img src="<?= base_url(); ?>/assets/images/avatar/avatar_x.png" alt="" class="avatar avatar-md rounded-circle" />
+                                    <img src="<?= base_url(); ?>assets/images/avatar/avatar_x.png" alt="" class="avatar avatar-md rounded-circle" />
                                     <div class="d-flex flex-column gap-1">
                                         <div>AliceÂ uploaded a new profile picture.</div>
                                         <small class="text-secondary"> 1 hour ago</small>
@@ -800,7 +800,7 @@
                         <a href="#" class="list-group-item list-group-item-action p-5 border-dashed border-bottom">
                             <div class="d-flex justify-content-between">
                                 <div class="d-flex gap-4 align-items-center">
-                                    <img src="<?= base_url(); ?>/assets/images/avatar/avatar-2.jpg" alt="" class="avatar avatar-md rounded-circle" />
+                                    <img src="<?= base_url(); ?>assets/images/avatar/avatar-2.jpg" alt="" class="avatar avatar-md rounded-circle" />
                                     <div class="d-flex flex-column gap-1">
                                         <div>Mike sent you a friend request.</div>
                                         <small class="text-secondary"> 5 minutes ago</small>

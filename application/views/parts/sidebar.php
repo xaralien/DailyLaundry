@@ -4,7 +4,7 @@
         <div id="miniSidebar">
             <div class="brand-logo">
                 <a class="d-flex align-items-center gap-2" href="<?= base_url(); ?>">
-                    <img src="<?= base_url(); ?>/assets/images/brand/logo/daily_laundry_icon.png" width="38" height="38" alt="" />
+                    <img src="<?= base_url(); ?>assets/images/brand/logo/daily_laundry_icon.png" width="38" height="38" alt="" />
                     <div class="d-flex flex-column lh-1">
                         <span class="fw-bold fs-4 site-logo-text">Daily Laundry</span>
                         <span class="fw-bold site-logo-text" style="font-size: 0.75rem; letter-spacing: 3px;">INERBANG</span>
@@ -28,7 +28,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="<?= base_url(); ?>/laundry"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg"
+                    <a class="nav-link" href="<?= base_url(); ?>laundry"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg"
                                 width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                                 stroke-linecap="round" class="icon icon-tabler icons-tabler-outline icon-tabler-wash-machine">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -42,7 +42,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="<?= base_url(); ?>/layanan"><span class="nav-icon">
+                    <a class="nav-link" href="<?= base_url(); ?>layanan"><span class="nav-icon">
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                                 stroke-linecap="round" class="icon icon-tabler icons-tabler-outline icon-tabler-hanger-2">
@@ -55,7 +55,7 @@
                         <span class="text">Layanan</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?= base_url(); ?>/notaconfig"><span class="nav-icon">
+                    <a class="nav-link" href="<?= base_url(); ?>notaconfig"><span class="nav-icon">
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                                 stroke-linecap="round" class="icon icon-tabler icons-tabler-outline icon-tabler-receipt-2">
@@ -89,10 +89,10 @@
 
 
                         <li class="nav-item">
-                            <a class="nav-link" href="<?= base_url(); ?>/pages/error/maintenance.html">Maintenance</a>
+                            <a class="nav-link" href="<?= base_url(); ?>pages/error/maintenance.html">Maintenance</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="<?= base_url(); ?>/pages/error/404-error.html">404 Error</a>
+                            <a class="nav-link" href="<?= base_url(); ?>pages/error/404-error.html">404 Error</a>
                         </li>
                     </ul>
                 </li>
@@ -113,19 +113,19 @@
                     </a>
                     <ul class="dropdown-menu flex-column">
                         <li class="nav-item">
-                            <a class="nav-link" href="<?= base_url(); ?>/pages/authentication/sign-in.html">Sign In</a>
+                            <a class="nav-link" href="<?= base_url(); ?>pages/authentication/sign-in.html">Sign In</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="<?= base_url(); ?>/pages/authentication/sign-up.html">Sign Up</a>
+                            <a class="nav-link" href="<?= base_url(); ?>pages/authentication/sign-up.html">Sign Up</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="<?= base_url(); ?>/pages/authentication/forget-password.html">Forget Password</a>
+                            <a class="nav-link" href="<?= base_url(); ?>pages/authentication/forget-password.html">Forget Password</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="<?= base_url(); ?>/pages/authentication/reset-password.html">Reset Password</a>
+                            <a class="nav-link" href="<?= base_url(); ?>pages/authentication/reset-password.html">Reset Password</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="<?= base_url(); ?>/pages/authentication/otp-varification.html">Otp Varification </a>
+                            <a class="nav-link" href="<?= base_url(); ?>pages/authentication/otp-varification.html">Otp Varification </a>
                         </li>
                     </ul>
                 </li>
@@ -232,7 +232,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link position-relative " href="<?= base_url(); ?>/pages/blank.html"
+                    <a class="nav-link position-relative " href="<?= base_url(); ?>pages/blank.html"
                         aria-label="External Link">
                         <span class="nav-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -251,7 +251,7 @@
                 <li>
                     <div class="text-center py-5 upgrade-ui ">
                         <div>
-                            <img src="<?= base_url(); ?>/assets/images/avatar/avatar_x.png" alt="" class="avatar avatar-md rounded-circle">
+                            <img src="<?= base_url(); ?>assets/images/avatar/avatar_x.png" alt="" class="avatar avatar-md rounded-circle">
                             <div class="my-3">
                                 <h5 class="mb-1 fs-6">Jitu Chauhan</h5>
                                 <span class="text-secondary">Free Version - 1 Month</span>
@@ -274,7 +274,7 @@
             <div class="offcanvas-header">
 
                 <a class="d-flex align-items-center gap-2" href="<?= base_url(); ?>">
-                    <img src="<?= base_url(); ?>/assets/images/brand/logo/daily_laundry_icon.png" width="38" height="38" alt="" />
+                    <img src="<?= base_url(); ?>assets/images/brand/logo/daily_laundry_icon.png" width="38" height="38" alt="" />
                     <div class="d-flex flex-column lh-1">
                         <span class="fw-bold fs-4 site-logo-text">Daily Laundry</span>
                         <span class="fw-bold site-logo-text" style="font-size: 0.75rem; letter-spacing: 3px;">INERBANG</span>
@@ -298,7 +298,7 @@
                                 </svg> <span class="text">Home</span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url(); ?>/laundry"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg"
+                        <a class="nav-link" href="<?= base_url(); ?>laundry"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg"
                                     width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                                     stroke-linecap="round" class="icon icon-tabler icons-tabler-outline icon-tabler-wash-machine">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -312,7 +312,7 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url(); ?>/layanan"><span class="nav-icon">
+                        <a class="nav-link" href="<?= base_url(); ?>layanan"><span class="nav-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                     width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                                     stroke-linecap="round" class="icon icon-tabler icons-tabler-outline icon-tabler-hanger-2">
@@ -325,7 +325,7 @@
                             <span class="text">Layanan</span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url(); ?>/notaconfig"><span class="nav-icon">
+                        <a class="nav-link" href="<?= base_url(); ?>notaconfig"><span class="nav-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                     width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                                     stroke-linecap="round" class="icon icon-tabler icons-tabler-outline icon-tabler-receipt-2">
@@ -339,7 +339,7 @@
                     <li>
                         <div class="text-center py-5 upgrade-ui ">
                             <div>
-                                <img src="<?= base_url(); ?>/assets/images/avatar/avatar_x.png" alt="" class="avatar avatar-md rounded-circle">
+                                <img src="<?= base_url(); ?>assets/images/avatar/avatar_x.png" alt="" class="avatar avatar-md rounded-circle">
                                 <div class="my-3">
                                     <span class="text-secondary">Made By</span>
                                     <h5 class="mb-1 fs-6">Xaralien</h5>

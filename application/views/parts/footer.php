@@ -10,11 +10,11 @@
 <script src="https://cdn.jsdelivr.net/npm/swiper@11.2.6/swiper-bundle.min.js"></script>
 
 <!-- Theme wrappers and custom JS -->
-<script src="<?= base_url(); ?>/assets/js/vendors/sidebarnav.js"></script>
-<!-- <script src="<?= base_url(); ?>/assets/js/vendors/chart.js"></script> -->
-<script src="<?= base_url(); ?>/assets/js/vendors/choice.js"></script>
-<script src="<?= base_url(); ?>/assets/js/vendors/swiper.js"></script>
-<script src="<?= base_url(); ?>/assets/js/main.js"></script>
+<script src="<?= base_url(); ?>assets/js/vendors/sidebarnav.js"></script>
+<!-- <script src="<?= base_url(); ?>assets/js/vendors/chart.js"></script> -->
+<script src="<?= base_url(); ?>assets/js/vendors/choice.js"></script>
+<script src="<?= base_url(); ?>assets/js/vendors/swiper.js"></script>
+<script src="<?= base_url(); ?>assets/js/main.js"></script>
 </body>
 
 </html>

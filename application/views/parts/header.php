@@ -9,10 +9,10 @@
     <title>DLI - Daily Laundry Inerbang</title>
 
     <!-- Favicon icon-->
-    <link rel="icon" type="image/png" href="<?= base_url(); ?>/assets/images/brand/logo/daily_laundry_icon.png" />
+    <link rel="icon" type="image/png" href="<?= base_url(); ?>assets/images/brand/logo/daily_laundry_icon.png" />
 
     <!-- Color modes -->
-    <script src="<?= base_url(); ?>/assets/js/vendors/color-modes.js"></script>
+    <script src="<?= base_url(); ?>assets/js/vendors/color-modes.js"></script>
     <script>
         if (localStorage.getItem('sidebarExpanded') === 'false') {
             document.documentElement.classList.add('collapsed');
@@ -37,7 +37,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <!-- Theme CSS -->
-    <link rel="stylesheet" href="<?= base_url(); ?>/assets/css/theme.css" />
+    <link rel="stylesheet" href="<?= base_url(); ?>assets/css/theme.css" />
 </head>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
