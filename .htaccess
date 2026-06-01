@@ -1,0 +1,32 @@
+RewriteEngine on
+RewriteCond $1 !^(index\.php|resources|robots\.txt)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+RewriteRule ^(.*/)?\.git(/|$) - [F,L]
+
+# Block all access to assets/ except CSS, JS, images
+RewriteCond %{REQUEST_URI} !\.(css|js|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|otf)$
+RewriteRule ^assets(/|$) - [F,L]
+
+# Allow only images, videos, PDFs, and text files in uploads/
+RewriteCond %{REQUEST_URI} !\.(jpg|jpeg|png|gif|svg|webp|mp4|avi|mov|pdf|txt|doc|docx|xls|xlsx|zip|rar)$ [NC]
+RewriteRule ^uploads/ - [F,L]
+
+
+<IfModule mod_php.c>
+php_value post_max_size 400M
+php_value upload_max_filesize 400M
+#php_value memory_limit 512M
+#php_value max_input_time 180
+#php_value max_execution_time 180 
+</IfModule>
+
+# <IfModule mod_rewrite.c>
+# RewriteEngine On
+# RewriteBase /
+# RewriteRule ^index.php$ - [L]
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteRule . /index.php [L]
+# </IfModule>
