@@ -345,7 +345,7 @@
                                 <path d="M8 14c1.333 -.667 2.667 -.667 4 0c1.333 .667 2.667 .667 4 0" />
                             </svg>
                         </div>
-                        <div><b>Cucian Hari Ini</b></div>
+                        <div><b>Cucian</b></div>
                     </div>
                     <div class="d-flex flex-column gap-2">
                         <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
