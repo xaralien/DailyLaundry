@@ -310,6 +310,45 @@
         </div>
     </div>
 </div>
+<!-- Modal Detail Order -->
+<div class="modal fade" id="detailOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-fullscreen-md-down">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="ti ti-list-details me-2"></i>Detail Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3" id="detailOrderInfo"></div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Layanan</th>
+                                <th>Qty</th>
+                                <th>Satuan</th>
+                                <th>Harga/Satuan</th>
+                                <th>Subtotal</th>
+                                <th>Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailOrderBody"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-end fw-bold">Total</td>
+                                <td colspan="2" class="fw-bold text-primary" id="detailOrderTotal"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Modal Process Order -->
 <div class="modal fade" id="processOrderModal" tabindex="-1" aria-labelledby="processOrderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -630,55 +669,54 @@
         const dataLayanan = <?= json_encode($layanan) ?>;
         let rowCount = 0;
 
-        function addRowLayanan(layananId = '', qty = '') {
+        function addRowLayanan(layananId = '', qty = '', catatan = '', hargaCustom = '') {
             rowCount++;
             const id = 'row_' + rowCount;
 
             let optionsHtml = '<option value="" disabled selected>Pilih layanan</option>';
             dataLayanan.forEach(l => {
                 const selected = l.id == layananId ? 'selected' : '';
-                optionsHtml += `<option value="${l.id}"
-                data-harga="${l.harga_per_kg}"
-                data-satuan="${l.satuan}"
-                ${selected}>${l.nama_layanan}</option>`;
+                optionsHtml += `<option value="${l.id}" data-harga="${l.harga_per_kg}" data-satuan="${l.satuan}" ${selected}>${l.nama_layanan}</option>`;
             });
 
             const row = `
-<tr id="${id}">
-    <td>
-        <select class="form-select form-select-sm layanan-select" data-row="${id}">
-            ${optionsHtml}
-        </select>
-    </td>
-    <td>
-        <input type="number" class="form-control form-control-sm layanan-qty"
-            data-row="${id}" value="${qty}" placeholder="0" min="0" step="0.01" style="min-width:80px">
-    </td>
-    <td>
-        <span class="badge bg-secondary layanan-satuan" id="satuan_${id}">-</span>
-    </td>
-    <td>
-        <span class="layanan-harga" id="harga_${id}">Rp 0</span>
-    </td>
-    <td>
-        <span class="layanan-subtotal fw-bold" id="subtotal_${id}">Rp 0</span>
-    </td>
-    <td>
-        <input type="text" class="form-control form-control-sm layanan-catatan"
-            data-row="${id}" placeholder="Catatan..." style="min-width:120px">
-    </td>
-    <td>
-        <button type="button" class="btn btn-danger btn-sm btnRemoveRow" data-row="${id}">
-            <i class="ti ti-trash"></i>
-        </button>
-    </td>
-</tr>`;
+    <tr id="${id}">
+        <td>
+            <select class="form-select form-select-sm layanan-select" data-row="${id}">
+                ${optionsHtml}
+            </select>
+        </td>
+        <td>
+            <input type="number" class="form-control form-control-sm layanan-qty"
+                data-row="${id}" value="${qty}" placeholder="0" min="0" step="0.01" style="min-width:80px">
+        </td>
+        <td>
+            <span class="badge bg-secondary layanan-satuan" id="satuan_${id}">-</span>
+        </td>
+        <td>
+            <div class="input-group input-group-sm" style="min-width:130px">
+                <span class="input-group-text">Rp</span>
+                <input type="number" class="form-control form-control-sm layanan-harga"
+                    id="harga_${id}" data-row="${id}" value="${hargaCustom || 0}" min="0">
+            </div>
+        </td>
+        <td>
+            <span class="layanan-subtotal fw-bold text-nowrap" id="subtotal_${id}">Rp 0</span>
+        </td>
+        <td>
+            <input type="text" class="form-control form-control-sm layanan-catatan"
+                data-row="${id}" placeholder="Catatan..." style="min-width:120px">
+        </td>
+        <td>
+            <button type="button" class="btn btn-danger btn-sm btnRemoveRow" data-row="${id}">
+                <i class="ti ti-trash"></i>
+            </button>
+        </td>
+    </tr>`;
 
             $('#bodyLayanan').append(row);
-
-            if (layananId) {
-                $(`#${id} .layanan-select`).trigger('change');
-            }
+            if (layananId) $(`#${id} .layanan-select`).trigger('change');
+            if (hargaCustom) $(`#harga_${id}`).val(hargaCustom);
         }
 
         // Tambah baris
@@ -692,15 +730,15 @@
             hitungTotal();
         });
 
-        // Saat layanan dipilih
+        // Saat layanan dipilih — set harga default dari layanan
         $(document).on('change', '.layanan-select', function() {
             const rowId = $(this).data('row');
-            const selected = $(this).find(':selected');
-            const harga = parseFloat(selected.data('harga')) || 0;
-            const satuan = selected.data('satuan') || '-';
+            const sel = $(this).find(':selected');
+            const harga = parseFloat(sel.data('harga')) || 0;
+            const satuan = sel.data('satuan') || '-';
 
             $(`#satuan_${rowId}`).text(satuan);
-            $(`#harga_${rowId}`).text(formatRp(harga));
+            $(`#harga_${rowId}`).val(harga); // set ke input, bisa diubah manual
             hitungSubtotal(rowId);
         });
 
@@ -709,8 +747,13 @@
             hitungSubtotal($(this).data('row'));
         });
 
+        // Saat harga diubah manual
+        $(document).on('input', '.layanan-harga', function() {
+            hitungSubtotal($(this).data('row'));
+        });
+
         function hitungSubtotal(rowId) {
-            const harga = parseFloat($(`#${rowId} .layanan-select`).find(':selected').data('harga')) || 0;
+            const harga = parseFloat($(`#harga_${rowId}`).val()) || 0; // ambil dari input
             const qty = parseFloat($(`#${rowId} .layanan-qty`).val()) || 0;
             const subtotal = harga * qty;
             $(`#subtotal_${rowId}`).text(formatRp(subtotal));
@@ -743,7 +786,7 @@
             let total = 0;
             $('#bodyLayanan tr').each(function() {
                 const rowId = $(this).attr('id');
-                const harga = parseFloat($(`#${rowId} .layanan-select`).find(':selected').data('harga')) || 0;
+                const harga = parseFloat($(`#harga_${rowId}`).val()) || 0; // dari input
                 const qty = parseFloat($(`#${rowId} .layanan-qty`).val()) || 0;
                 total += harga * qty;
             });
@@ -751,8 +794,6 @@
             const delivery = $('#switchDelivery').is(':checked') ?
                 parseFloat($('#inputDelivery').val()) || 0 : 0;
             total += delivery;
-
-            // Bulatkan ke ribuan terdekat (500 ke atas naik, di bawah 500 turun)
             total = Math.round(total / 1000) * 1000;
 
             $('#inputHarga').val(total);
@@ -877,9 +918,9 @@
                 detailLayanan.push({
                     layanan_id: layananId,
                     qty: qty,
-                    harga_satuan: harga,
-                    subtotal: harga * qty,
-                    catatan: $(`#${rowId} .layanan-catatan`).val() || '', // tambah
+                    harga_satuan: parseFloat($(`#harga_${rowId}`).val()) || 0, // dari input
+                    subtotal: (parseFloat($(`#harga_${rowId}`).val()) || 0) * qty,
+                    catatan: $(`#${rowId} .layanan-catatan`).val() || '',
                 });
             });
 
@@ -1063,7 +1104,7 @@
         // Row layanan untuk modal EDIT
         let editRowCount = 0;
 
-        function addRowEditLayanan(layananId = '', qty = '', catatan = '') {
+        function addRowEditLayanan(layananId = '', qty = '', catatan = '', hargaCustom = '') {
             editRowCount++;
             const id = 'editrow_' + editRowCount;
 
@@ -1074,20 +1115,26 @@
             });
 
             const row = `
-<tr id="${id}">
-    <td><select class="form-select form-select-sm edit-layanan-select" data-row="${id}">${optionsHtml}</select></td>
-    <td><input type="number" class="form-control form-control-sm edit-layanan-qty" data-row="${id}" value="${qty}" placeholder="0" min="0" step="0.01" style="min-width:80px"></td>
-    <td><span class="badge bg-secondary edit-layanan-satuan" id="esatuan_${id}">-</span></td>
-    <td><span id="eharga_${id}">Rp 0</span></td>
-    <td><span class="fw-bold" id="esubtotal_${id}">Rp 0</span></td>
-    <td><input type="text" class="form-control form-control-sm edit-layanan-catatan" data-row="${id}" placeholder="Catatan..." style="min-width:120px"></td>
-    <td><button type="button" class="btn btn-danger btn-sm btnEditRemoveRow" data-row="${id}"><i class="ti ti-trash"></i></button></td>
-</tr>`;
+    <tr id="${id}">
+        <td><select class="form-select form-select-sm edit-layanan-select" data-row="${id}">${optionsHtml}</select></td>
+        <td><input type="number" class="form-control form-control-sm edit-layanan-qty" data-row="${id}" value="${qty}" placeholder="0" min="0" step="0.01" style="min-width:80px"></td>
+        <td><span class="badge bg-secondary edit-layanan-satuan" id="esatuan_${id}">-</span></td>
+        <td>
+            <div class="input-group input-group-sm" style="min-width:130px">
+                <span class="input-group-text">Rp</span>
+                <input type="number" class="form-control form-control-sm edit-layanan-harga"
+                    id="eharga_${id}" data-row="${id}" value="${hargaCustom || 0}" min="0">
+            </div>
+        </td>
+        <td><span class="fw-bold text-nowrap" id="esubtotal_${id}">Rp 0</span></td>
+        <td><input type="text" class="form-control form-control-sm edit-layanan-catatan" data-row="${id}" placeholder="Catatan..." style="min-width:120px"></td>
+        <td><button type="button" class="btn btn-danger btn-sm btnEditRemoveRow" data-row="${id}"><i class="ti ti-trash"></i></button></td>
+    </tr>`;
 
             $('#editBodyLayanan').append(row);
             if (layananId) $(`#${id} .edit-layanan-select`).trigger('change');
+            if (hargaCustom) $(`#eharga_${id}`).val(hargaCustom);
             if (catatan) $(`#${id} .edit-layanan-catatan`).val(catatan);
-
         }
 
         $('#btnEditAddLayanan').on('click', function() {
@@ -1099,11 +1146,12 @@
             hitungEditTotal();
         });
 
+        // Edit modal
         $(document).on('change', '.edit-layanan-select', function() {
             const rowId = $(this).data('row');
             const sel = $(this).find(':selected');
             $(`#esatuan_${rowId}`).text(sel.data('satuan') || '-');
-            $(`#eharga_${rowId}`).text(formatRp(sel.data('harga')));
+            $(`#eharga_${rowId}`).val(parseFloat(sel.data('harga')) || 0);
             hitungEditSubtotal(rowId);
         });
 
@@ -1111,8 +1159,12 @@
             hitungEditSubtotal($(this).data('row'));
         });
 
+        $(document).on('input', '.edit-layanan-harga', function() {
+            hitungEditSubtotal($(this).data('row'));
+        });
+
         function hitungEditSubtotal(rowId) {
-            const harga = parseFloat($(`#${rowId} .edit-layanan-select`).find(':selected').data('harga')) || 0;
+            const harga = parseFloat($(`#eharga_${rowId}`).val()) || 0;
             const qty = parseFloat($(`#${rowId} .edit-layanan-qty`).val()) || 0;
             $(`#esubtotal_${rowId}`).text(formatRp(harga * qty));
             hitungEditTotal();
@@ -1145,7 +1197,7 @@
             let total = 0;
             $('#editBodyLayanan tr').each(function() {
                 const rowId = $(this).attr('id');
-                const harga = parseFloat($(`#${rowId} .edit-layanan-select`).find(':selected').data('harga')) || 0;
+                const harga = parseFloat($(`#eharga_${rowId}`).val()) || 0; // dari input
                 const qty = parseFloat($(`#${rowId} .edit-layanan-qty`).val()) || 0;
                 total += harga * qty;
             });
@@ -1153,8 +1205,6 @@
             const delivery = $('#editSwitchDelivery').is(':checked') ?
                 parseFloat($('#editInputDelivery').val()) || 0 : 0;
             total += delivery;
-
-            // Bulatkan ke ribuan terdekat
             total = Math.round(total / 1000) * 1000;
 
             $('#editInputHarga').val(total);
@@ -1237,9 +1287,9 @@
                 editDetailLayanan.push({
                     layanan_id: layananId,
                     qty,
-                    harga_satuan: harga,
-                    subtotal: harga * qty,
-                    catatan: $(`#${rowId} .edit-layanan-catatan`).val() || '', // tambah
+                    harga_satuan: parseFloat($(`#eharga_${rowId}`).val()) || 0, // dari input
+                    subtotal: (parseFloat($(`#eharga_${rowId}`).val()) || 0) * qty,
+                    catatan: $(`#${rowId} .edit-layanan-catatan`).val() || '',
                 });
             });
 
@@ -1488,6 +1538,77 @@
                 }
             });
         });
+
+        window.detailOrder = function(id) {
+            $.ajax({
+                url: '<?= base_url("laundry/getOrder") ?>',
+                type: 'POST',
+                data: {
+                    id
+                },
+                dataType: 'json',
+                beforeSend: function() {
+                    Swal.fire({
+                        title: 'Memuat...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+                },
+                success: function(order) {
+                    Swal.close();
+                    if (!order) return;
+
+                    // Info order
+                    $('#detailOrderInfo').html(`
+                <div class="row g-2">
+                    <div class="col-6 col-md-3">
+                        <small class="text-muted d-block">No Nota</small>
+                        <span class="fw-semibold">${order.no_nota}</span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <small class="text-muted d-block">Customer</small>
+                        <span class="fw-semibold">${order.nama_customer}</span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <small class="text-muted d-block">Tgl Masuk</small>
+                        <span class="fw-semibold">${order.tgl_masuk}</span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <small class="text-muted d-block">Status</small>
+                        <span class="fw-semibold">${order.status}</span>
+                    </div>
+                </div>
+                <hr class="my-2">
+            `);
+
+                    // Tabel detail
+                    let html = '';
+                    let total = 0;
+
+                    if (order.details && order.details.length > 0) {
+                        order.details.forEach((d, i) => {
+                            total += parseFloat(d.subtotal);
+                            html += `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${d.nama_layanan}</td>
+                        <td>${d.qty}</td>
+                        <td><span class="badge bg-secondary">${d.satuan}</span></td>
+                        <td>${formatRp(d.harga_satuan)}</td>
+                        <td class="fw-bold">${formatRp(d.subtotal)}</td>
+                        <td><small class="text-muted">${d.catatan || '-'}</small></td>
+                    </tr>`;
+                        });
+                    } else {
+                        html = '<tr><td colspan="7" class="text-center text-muted">Tidak ada detail</td></tr>';
+                    }
+
+                    $('#detailOrderBody').html(html);
+                    $('#detailOrderTotal').text(formatRp(total));
+                    $('#detailOrderModal').modal('show');
+                }
+            });
+        };
 
     });
 </script>

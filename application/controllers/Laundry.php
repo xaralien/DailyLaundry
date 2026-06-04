@@ -41,6 +41,14 @@ class Laundry extends CI_Controller
 				default        => 'text-secondary-emphasis bg-secondary-subtle',
 			};
 
+			// Hitung jumlah detail
+			$jumlahDetail = $this->db->where('order_id', $r->id)->count_all_results('order_detail');
+
+			$btnDetail = $jumlahDetail > 2
+				? "<a href='#' class='btn btn-sm btn-outline-info me-1' onclick='detailOrder(" . $r->id . ")'><i class='ti ti-list-details'></i></a>"
+				: '';
+
+
 			$delivery = $r->is_delivery
 				? "<span class='badge text-primary-emphasis bg-primary-subtle'>
             <i class='ti ti-truck me-1'></i>Delivery
@@ -64,12 +72,14 @@ class Laundry extends CI_Controller
 				$r->tgl_selesai ? date('d M Y', strtotime($r->tgl_selesai)) : '-',
 				$r->no_nota,
 				$r->nama_customer,
-				$r->layanan_summary ?? '-',   // ganti dari nama_layanan
+				$jumlahDetail > 2
+					? "<span class='text-muted small'>" . $jumlahDetail . " layanan</span> " . $btnDetail
+					: ($r->layanan_summary ?? '-'),
 				$r->total_qty ?? '-',          // ganti dari berat_kg
 				$r->detail_item ?? '-',
-				'<span title="Rp ' . number_format($r->harga, 0, ',', '.') . '">' . 'Rp ' . round($r->harga / 1000) . 'k</span>',
-				'<span title="Rp ' . number_format($r->debit, 0, ',', '.') . '">' . 'Rp ' . round($r->debit / 1000) . 'k</span>',
-				'<span title="Rp ' . number_format($r->kredit, 0, ',', '.') . '">' . 'Rp ' . round($r->kredit / 1000) . 'k</span>',
+				'<span style="min-width:80px;display:inline-block" title="Rp ' . number_format($r->harga, 0, ',', '.') . '">' . 'Rp ' . round($r->harga / 1000) . 'k</span>',
+				'<span style="min-width:80px;display:inline-block" title="Rp ' . number_format($r->debit, 0, ',', '.') . '">' . 'Rp ' . round($r->debit / 1000) . 'k</span>',
+				'<span style="min-width:80px;display:inline-block" title="Rp ' . number_format($r->kredit, 0, ',', '.') . '">' . 'Rp ' . round($r->kredit / 1000) . 'k</span>',
 				$delivery,
 				"<span class='badge {$statusClass}'>" . ucwords(str_replace('_', ' ', $r->status)) . "</span>",
 				$btn_prosses . "<a href='#' class='btn btn-sm btn-outline-warning' onclick='editOrder(" . $r->id . ")'>Edit</a> <a href='#' class='btn btn-sm btn-outline-danger' onclick='deleteOrder(" . $r->id . ")'>Delete</a>",
