@@ -76,14 +76,37 @@
                         <label class="form-label">Tanggal Selesai</label>
                         <input type="date" class="form-control" name="tgl_selesai">
                     </div>
-                    <div class="col-6">
-                        <label class="form-label">Layanan</label>
-                        <select class="form-select" name="layanan_id">
-                            <option value="" disabled selected>Pilih layanan</option>
-                            <?php foreach ($layanan as $l): ?>
-                                <option value="<?= $l->id ?>"><?= $l->nama_layanan ?> - <?= 'Rp ' . number_format($l->harga_per_kg, 0, ',', '.') ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                    <!-- Hapus col-6 Layanan dan col-6 Berat yang lama, ganti dengan ini -->
+                    <div class="col-12">
+                        <label class="form-label">Layanan & Quantity</label>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-2" id="tblLayanan">
+                                <thead>
+                                    <tr>
+                                        <th>Layanan</th>
+                                        <th>Qty</th>
+                                        <th>Satuan</th>
+                                        <th>Harga/Satuan</th>
+                                        <th>Subtotal</th>
+                                        <th>Catatan</th> <!-- tambah -->
+                                        <th>
+                                            <button type="button" class="btn btn-success btn-sm" id="btnAddLayanan">
+                                                <i class="ti ti-plus"></i>
+                                            </button>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyLayanan">
+                                    <!-- row dinamis -->
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="4" class="text-end fw-bold">Total</td>
+                                        <td colspan="2" class="fw-bold text-primary" id="totalLayanan">Rp 0</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                     <!-- Tambahkan ini -->
                     <div class="col-12 col-md-6">
@@ -100,10 +123,6 @@
                             <input type="number" class="form-control" id="inputDelivery" name="biaya_delivery" placeholder="0" min="0">
                         </div>
                         <small class="text-muted" id="previewDelivery"></small>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">Berat (kg)</label>
-                        <input type="number" class="form-control" name="berat_kg" placeholder="0.00" step="0.01" min="0">
                     </div>
                     <div class="col-12">
                         <label class="form-label">Detail Item</label>
@@ -188,15 +207,39 @@
                         <label class="form-label">Tanggal Selesai</label>
                         <input type="date" class="form-control" id="editTglSelesai">
                     </div>
-                    <div class="col-6">
-                        <label class="form-label">Layanan</label>
-                        <select class="form-select" id="editLayananId">
-                            <option value="" disabled>Pilih layanan</option>
-                            <?php foreach ($layanan as $l): ?>
-                                <option value="<?= $l->id ?>"><?= $l->nama_layanan ?> - <?= 'Rp ' . number_format($l->harga_per_kg, 0, ',', '.') ?></option>
-                            <?php endforeach; ?>
-                        </select>
+
+                    <!-- Tabel Multi Layanan -->
+                    <div class="col-12">
+                        <label class="form-label">Layanan & Quantity</label>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-2" id="tblEditLayanan">
+                                <thead>
+                                    <tr>
+                                        <th>Layanan</th>
+                                        <th>Qty</th>
+                                        <th>Satuan</th>
+                                        <th>Harga/Satuan</th>
+                                        <th>Subtotal</th>
+                                        <th>Catatan</th> <!-- tambah -->
+                                        <th>
+                                            <button type="button" class="btn btn-success btn-sm" id="btnEditAddLayanan">
+                                                <i class="ti ti-plus"></i>
+                                            </button>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="editBodyLayanan"></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="4" class="text-end fw-bold">Total</td>
+                                        <td colspan="2" class="fw-bold text-primary" id="editTotalLayanan">Rp 0</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
+
+                    <!-- Delivery -->
                     <div class="col-12 col-md-6">
                         <label class="form-label">Delivery</label>
                         <div class="form-check form-switch mt-2">
@@ -212,10 +255,7 @@
                         </div>
                         <small class="text-muted" id="editPreviewDelivery"></small>
                     </div>
-                    <div class="col-6">
-                        <label class="form-label">Berat (kg)</label>
-                        <input type="number" class="form-control" id="editBeratKg" placeholder="0.00" step="0.01" min="0">
-                    </div>
+
                     <div class="col-12">
                         <label class="form-label">Detail Item</label>
                         <input type="text" class="form-control" id="editDetailItem" placeholder="Contoh: BC 3, Sprei 3Set, Selimut 1">
@@ -224,7 +264,7 @@
                         <label class="form-label">Harga</label>
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
-                            <input type="number" class="form-control" id="editInputHarga" placeholder="0" min="0">
+                            <input type="number" class="form-control" id="editInputHarga" placeholder="0" min="0" readonly>
                         </div>
                         <small class="text-muted" id="editPreviewHarga"></small>
                     </div>
@@ -270,7 +310,6 @@
         </div>
     </div>
 </div>
-
 <!-- Modal Process Order -->
 <div class="modal fade" id="processOrderModal" tabindex="-1" aria-labelledby="processOrderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -453,8 +492,8 @@
                                 <th>Tanggal Selesai</th>
                                 <th>No Nota</th>
                                 <th>Nama Cust</th>
-                                <th>Layanan</th>
-                                <th>Berat</th>
+                                <th>Layanan & Qty</th>
+                                <th>Total Qty</th>
                                 <th>Detail</th>
                                 <th>Harga</th>
                                 <th>Dibayar</th>
@@ -545,22 +584,32 @@
 <script>
     $(document).ready(function() {
 
-        // DataTable
+        // =============================================
+        // FORMAT RUPIAH
+        // =============================================
+        const formatRp = (angka) => angka ? 'Rp ' + parseInt(angka).toLocaleString('id-ID') : '';
+
+        const formatRbK = (angka) => {
+            if (!angka) return 'Rp 0';
+            const ribu = Math.round(parseInt(angka) / 1000);
+            return 'Rp ' + ribu + 'k';
+        };
+
+        // =============================================
+        // DATATABLE
+        // =============================================
         $('#orderTable').DataTable({
             processing: true,
             serverSide: true,
             scrollX: true,
-
             ajax: {
                 url: '<?= base_url("laundry/getData") ?>',
                 type: 'POST'
             },
-            columnDefs: [ // Delivery   ← tambah
-                {
-                    orderable: false,
-                    targets: [13]
-                },
-            ],
+            columnDefs: [{
+                orderable: false,
+                targets: [7, 12, 13]
+            }, ],
             language: {
                 search: "Cari:",
                 lengthMenu: "Tampilkan _MENU_ data",
@@ -575,35 +624,150 @@
             }
         });
 
-        // Auto tanggal masuk hari ini
-        const today = new Date().toISOString().split('T')[0];
-        $('#tglMasuk').val(today);
+        // =============================================
+        // DATA LAYANAN UNTUK JS
+        // =============================================
+        const dataLayanan = <?= json_encode($layanan) ?>;
+        let rowCount = 0;
 
-        // Format Rupiah
-        const formatRp = (angka) => angka ? 'Rp ' + parseInt(angka).toLocaleString('id-ID') : '';
+        function addRowLayanan(layananId = '', qty = '') {
+            rowCount++;
+            const id = 'row_' + rowCount;
 
-        // Simpan harga per kg saat layanan dipilih
-        let hargaPerKg = 0;
-
-        $('[name="layanan_id"]').on('change', function() {
-            const id = $(this).val();
-            if (!id) return;
-
-            $.ajax({
-                url: '<?= base_url("laundry/getHargaLayanan") ?>',
-                type: 'POST',
-                data: {
-                    id: id
-                },
-                dataType: 'json',
-                success: function(res) {
-                    hargaPerKg = parseFloat(res.harga_per_kg) || 0;
-                    hitungHarga();
-                }
+            let optionsHtml = '<option value="" disabled selected>Pilih layanan</option>';
+            dataLayanan.forEach(l => {
+                const selected = l.id == layananId ? 'selected' : '';
+                optionsHtml += `<option value="${l.id}"
+                data-harga="${l.harga_per_kg}"
+                data-satuan="${l.satuan}"
+                ${selected}>${l.nama_layanan}</option>`;
             });
+
+            const row = `
+<tr id="${id}">
+    <td>
+        <select class="form-select form-select-sm layanan-select" data-row="${id}">
+            ${optionsHtml}
+        </select>
+    </td>
+    <td>
+        <input type="number" class="form-control form-control-sm layanan-qty"
+            data-row="${id}" value="${qty}" placeholder="0" min="0" step="0.01" style="min-width:80px">
+    </td>
+    <td>
+        <span class="badge bg-secondary layanan-satuan" id="satuan_${id}">-</span>
+    </td>
+    <td>
+        <span class="layanan-harga" id="harga_${id}">Rp 0</span>
+    </td>
+    <td>
+        <span class="layanan-subtotal fw-bold" id="subtotal_${id}">Rp 0</span>
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm layanan-catatan"
+            data-row="${id}" placeholder="Catatan..." style="min-width:120px">
+    </td>
+    <td>
+        <button type="button" class="btn btn-danger btn-sm btnRemoveRow" data-row="${id}">
+            <i class="ti ti-trash"></i>
+        </button>
+    </td>
+</tr>`;
+
+            $('#bodyLayanan').append(row);
+
+            if (layananId) {
+                $(`#${id} .layanan-select`).trigger('change');
+            }
+        }
+
+        // Tambah baris
+        $('#btnAddLayanan').on('click', function() {
+            addRowLayanan();
         });
 
-        // Toggle field biaya delivery
+        // Hapus baris
+        $(document).on('click', '.btnRemoveRow', function() {
+            $('#' + $(this).data('row')).remove();
+            hitungTotal();
+        });
+
+        // Saat layanan dipilih
+        $(document).on('change', '.layanan-select', function() {
+            const rowId = $(this).data('row');
+            const selected = $(this).find(':selected');
+            const harga = parseFloat(selected.data('harga')) || 0;
+            const satuan = selected.data('satuan') || '-';
+
+            $(`#satuan_${rowId}`).text(satuan);
+            $(`#harga_${rowId}`).text(formatRp(harga));
+            hitungSubtotal(rowId);
+        });
+
+        // Saat qty berubah
+        $(document).on('input', '.layanan-qty', function() {
+            hitungSubtotal($(this).data('row'));
+        });
+
+        function hitungSubtotal(rowId) {
+            const harga = parseFloat($(`#${rowId} .layanan-select`).find(':selected').data('harga')) || 0;
+            const qty = parseFloat($(`#${rowId} .layanan-qty`).val()) || 0;
+            const subtotal = harga * qty;
+            $(`#subtotal_${rowId}`).text(formatRp(subtotal));
+            hitungTotal();
+        }
+
+        // function hitungTotal() {
+        //     let total = 0;
+        //     $('#bodyLayanan tr').each(function() {
+        //         const rowId = $(this).attr('id');
+        //         const harga = parseFloat($(`#${rowId} .layanan-select`).find(':selected').data('harga')) || 0;
+        //         const qty = parseFloat($(`#${rowId} .layanan-qty`).val()) || 0;
+        //         total += harga * qty;
+        //     });
+
+        //     const delivery = $('#switchDelivery').is(':checked') ?
+        //         parseFloat($('#inputDelivery').val()) || 0 : 0;
+        //     total += delivery;
+
+        //     $('#inputHarga').val(total);
+        //     $('#previewHarga').text(total ? formatRp(total) : '');
+        //     $('#totalLayanan').text(formatRp(total));
+
+        //     const debit = parseFloat($('#inputDebit').val()) || 0;
+        //     const kredit = Math.max(0, total - debit);
+        //     $('#inputKredit').val(kredit);
+        //     $('#previewKredit').text(kredit ? formatRp(kredit) : '');
+        // }
+        function hitungTotal() {
+            let total = 0;
+            $('#bodyLayanan tr').each(function() {
+                const rowId = $(this).attr('id');
+                const harga = parseFloat($(`#${rowId} .layanan-select`).find(':selected').data('harga')) || 0;
+                const qty = parseFloat($(`#${rowId} .layanan-qty`).val()) || 0;
+                total += harga * qty;
+            });
+
+            const delivery = $('#switchDelivery').is(':checked') ?
+                parseFloat($('#inputDelivery').val()) || 0 : 0;
+            total += delivery;
+
+            // Bulatkan ke ribuan terdekat (500 ke atas naik, di bawah 500 turun)
+            total = Math.round(total / 1000) * 1000;
+
+            $('#inputHarga').val(total);
+            $('#previewHarga').text(total ? formatRp(total) : '');
+            $('#totalLayanan').text(formatRp(total));
+
+            const debit = parseFloat($('#inputDebit').val()) || 0;
+            const kredit = Math.max(0, total - debit);
+            $('#inputKredit').val(kredit);
+            $('#previewKredit').text(kredit ? formatRp(kredit) : '');
+        }
+
+        // =============================================
+        // DELIVERY
+        // =============================================
         $('#switchDelivery').on('change', function() {
             if ($(this).is(':checked')) {
                 $('#fieldDelivery').slideDown();
@@ -611,61 +775,64 @@
                 $('#fieldDelivery').slideUp();
                 $('#inputDelivery').val('');
                 $('#previewDelivery').text('');
-                hitungHarga();
+                hitungTotal();
             }
         });
 
-        // Hitung harga saat biaya delivery berubah
-        $('#inputDelivery').on('blur', function() {
+        $('#inputDelivery').on('input', function() {
             $('#previewDelivery').text(formatRp($(this).val()));
-            hitungHarga();
+            hitungTotal();
         });
 
-        // Hitung harga saat berat berubah
-        $('[name="berat_kg"]').on('input', function() {
-            hitungHarga();
-        });
-
-        function hitungHarga() {
-            const berat = parseFloat($('[name="berat_kg"]').val()) || 0;
-            const harga = berat * hargaPerKg;
-
-            $('#inputHarga').val(harga);
-            $('#previewHarga').text(harga ? formatRp(harga) : '');
-
-            // Trigger hitung kredit
-            const debit = parseFloat($('#inputDebit').val()) || 0;
-            const kredit = Math.max(0, harga - debit);
-            $('#inputKredit').val(kredit);
-            $('#previewKredit').text(kredit ? formatRp(kredit) : '');
-        }
-
-        const hitungKredit = () => {
-            const harga = parseFloat($('#inputHarga').val()) || 0;
-            const debit = parseFloat($('#inputDebit').val()) || 0;
-            const kredit = Math.max(0, harga - debit);
-            $('#inputKredit').val(kredit);
-            $('#previewKredit').text(kredit ? formatRp(kredit) : '');
-        };
-
-        $('#inputHarga').on('blur', function() {
-            $('#previewHarga').text(formatRp($(this).val()));
-            hitungKredit();
+        // =============================================
+        // DEBIT / KREDIT
+        // =============================================
+        $('#inputDebit').on('input', function() {
+            hitungTotal();
         });
 
         $('#inputDebit').on('blur', function() {
             $('#previewDebit').text(formatRp($(this).val()));
-            hitungKredit();
         });
+
+        // =============================================
+        // RESET FORM
+        // =============================================
+        function resetForm() {
+            $('[name="no_nota"]').val('');
+            $('[name="nama_customer"]').val('');
+            $('[name="tgl_selesai"]').val('');
+            $('[name="detail_item"]').val('');
+            $('#inputHarga, #inputDebit, #inputKredit').val('');
+            $('#inputDelivery').val('');
+            $('[name="catatan"]').val('');
+            $('[name="status"]').val('proses');
+            $('#previewHarga, #previewDebit, #previewKredit, #previewDelivery').text('');
+            $('#switchDelivery').prop('checked', false);
+            $('#fieldDelivery').hide();
+            $('#totalLayanan').text('Rp 0');
+            $('#bodyLayanan').empty();
+            rowCount = 0;
+            addRowLayanan();
+
+            $.get('<?= base_url("laundry/getNextNota") ?>', function(res) {
+                $('[name="no_nota"]').val(res.nota);
+            }, 'json');
+        }
 
         // Reset saat modal dibuka
         $('#tambahOrderModal').on('show.bs.modal', function() {
-            $('#previewHarga, #previewDebit, #previewKredit').text('');
+            resetForm();
+            const today = new Date().toISOString().split('T')[0];
+            $('#tglMasuk').val(today);
         });
 
+        // =============================================
+        // SIMPAN ORDER
+        // =============================================
         $('#btnSimpan').on('click', function() {
 
-            // Validasi field wajib
+            // Validasi wajib
             const requiredFields = [{
                     selector: '[name="no_nota"]',
                     label: 'No Nota'
@@ -675,20 +842,8 @@
                     label: 'Nama Customer'
                 },
                 {
-                    selector: '[name="layanan_id"]',
-                    label: 'Layanan'
-                },
-                {
                     selector: '[name="tgl_masuk"]',
                     label: 'Tanggal Masuk'
-                },
-                {
-                    selector: '[name="berat_kg"]',
-                    label: 'Berat'
-                },
-                {
-                    selector: '[name="harga"]',
-                    label: 'Harga'
                 },
             ];
 
@@ -698,13 +853,46 @@
                         icon: 'warning',
                         title: 'Peringatan',
                         text: field.label + ' wajib diisi!',
-                        confirmButtonColor: '#378ADD',
+                        confirmButtonColor: '#378ADD'
                     });
                     return;
                 }
             }
 
-            // Konfirmasi sebelum simpan
+            // Validasi detail layanan
+            const detailLayanan = [];
+            let validLayanan = true;
+
+            $('#bodyLayanan tr').each(function() {
+                const rowId = $(this).attr('id');
+                const layananId = $(`#${rowId} .layanan-select`).val();
+                const harga = parseFloat($(`#${rowId} .layanan-select`).find(':selected').data('harga')) || 0;
+                const qty = parseFloat($(`#${rowId} .layanan-qty`).val()) || 0;
+
+                if (!layananId || qty <= 0) {
+                    validLayanan = false;
+                    return false;
+                }
+
+                detailLayanan.push({
+                    layanan_id: layananId,
+                    qty: qty,
+                    harga_satuan: harga,
+                    subtotal: harga * qty,
+                    catatan: $(`#${rowId} .layanan-catatan`).val() || '', // tambah
+                });
+            });
+
+            if (!validLayanan || detailLayanan.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Isi layanan dan quantity dengan benar!',
+                    confirmButtonColor: '#378ADD'
+                });
+                return;
+            }
+
             Swal.fire({
                 title: 'Simpan Order?',
                 text: 'Pastikan data yang dimasukkan sudah benar.',
@@ -717,60 +905,52 @@
             }).then((result) => {
                 if (!result.isConfirmed) return;
 
-                // Loading
                 Swal.fire({
                     title: 'Menyimpan...',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
-                    didOpen: () => Swal.showLoading(),
+                    didOpen: () => Swal.showLoading()
                 });
-
-                const formData = {
-                    no_nota: $('[name="no_nota"]').val(),
-                    nama_customer: $('[name="nama_customer"]').val(),
-                    layanan_id: $('[name="layanan_id"]').val(),
-                    is_delivery: $('#switchDelivery').is(':checked') ? 1 : 0,
-                    biaya_delivery: $('#inputDelivery').val() || 0,
-                    tgl_masuk: $('[name="tgl_masuk"]').val(),
-                    tgl_selesai: $('[name="tgl_selesai"]').val(),
-                    berat_kg: $('[name="berat_kg"]').val(),
-                    detail_item: $('[name="detail_item"]').val(),
-                    harga: $('#inputHarga').val(),
-                    debit: $('#inputDebit').val(),
-                    kredit: $('#inputKredit').val(),
-                    catatan: $('[name="catatan"]').val(),
-                    status: $('[name="status"]').val(),
-                };
 
                 $.ajax({
                     url: '<?= base_url("laundry/simpan") ?>',
                     type: 'POST',
-                    data: formData,
                     dataType: 'json',
+                    data: {
+                        no_nota: $('[name="no_nota"]').val(),
+                        nama_customer: $('[name="nama_customer"]').val(),
+                        tgl_masuk: $('[name="tgl_masuk"]').val(),
+                        tgl_selesai: $('[name="tgl_selesai"]').val(),
+                        detail_item: $('[name="detail_item"]').val(),
+                        harga: $('#inputHarga').val(),
+                        debit: $('#inputDebit').val(),
+                        kredit: $('#inputKredit').val(),
+                        catatan: $('[name="catatan"]').val(),
+                        status: $('[name="status"]').val(),
+                        is_delivery: $('#switchDelivery').is(':checked') ? 1 : 0,
+                        biaya_delivery: $('#inputDelivery').val() || 0,
+                        detail_layanan: JSON.stringify(detailLayanan),
+                    },
                     success: function(res) {
                         if (res.status === 'success') {
                             $('#tambahOrderModal').modal('hide');
                             $('#orderTable').DataTable().ajax.reload(null, false);
                             refreshSummary();
-
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Berhasil!',
                                 text: res.message,
                                 confirmButtonColor: '#378ADD',
                                 timer: 2000,
-                                timerProgressBar: true,
+                                timerProgressBar: true
                             });
-
-                            // Reset form
                             resetForm();
-
                         } else {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Gagal!',
                                 text: res.message,
-                                confirmButtonColor: '#378ADD',
+                                confirmButtonColor: '#378ADD'
                             });
                         }
                     },
@@ -778,45 +958,13 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Error!',
-                            text: 'Terjadi kesalahan pada server. Silakan coba lagi.',
-                            confirmButtonColor: '#378ADD',
+                            text: 'Terjadi kesalahan pada server.',
+                            confirmButtonColor: '#378ADD'
                         });
                         console.error(xhr.responseText);
                     }
                 });
             });
-        });
-
-        // Reset form setelah simpan
-        function resetForm() {
-            $('[name="no_nota"]').val(''); // akan diisi ulang dari server
-            $('[name="nama_customer"]').val('');
-            $('[name="layanan_id"]').val('').trigger('change');
-            $('#switchDelivery').prop('checked', false);
-            $('#fieldDelivery').hide();
-            $('#inputDelivery').val('');
-            $('#previewDelivery').text('');
-            $('[name="tgl_selesai"]').val('');
-            $('[name="berat_kg"]').val('');
-            $('[name="detail_item"]').val('');
-            $('#inputHarga').val('');
-            $('#inputDebit').val('');
-            $('#inputKredit').val('');
-            $('[name="catatan"]').val('');
-            $('[name="status"]').val('proses');
-            $('#previewHarga, #previewDebit, #previewKredit').text('');
-
-            // Refresh no nota dari server
-            $.get('<?= base_url("laundry/getNextNota") ?>', function(res) {
-                $('[name="no_nota"]').val(res.nota);
-            }, 'json');
-        }
-
-        // Reset form saat modal dibuka
-        $('#tambahOrderModal').on('show.bs.modal', function() {
-            resetForm();
-            const today = new Date().toISOString().split('T')[0];
-            $('#tglMasuk').val(today);
         });
 
         // =============================================
@@ -849,7 +997,7 @@
                         title: 'Memuat data...',
                         allowOutsideClick: false,
                         allowEscapeKey: false,
-                        didOpen: () => Swal.showLoading(),
+                        didOpen: () => Swal.showLoading()
                     });
                 },
                 success: function(order) {
@@ -868,8 +1016,6 @@
                     $('#editNamaCustomer').val(order.nama_customer);
                     $('#editTglMasuk').val(order.tgl_masuk);
                     $('#editTglSelesai').val(order.tgl_selesai ?? '');
-                    $('#editLayananId').val(order.layanan_id);
-                    $('#editBeratKg').val(order.berat_kg);
                     $('#editDetailItem').val(order.detail_item);
                     $('#editInputHarga').val(order.harga);
                     $('#editInputDebit').val(order.debit);
@@ -894,20 +1040,134 @@
                         $('#editPreviewDelivery').text('');
                     }
 
+                    // Load detail layanan ke tabel edit
+                    $('#editBodyLayanan').empty();
+                    if (order.details && order.details.length > 0) {
+                        order.details.forEach(d => addRowEditLayanan(d.layanan_id, d.qty, d.catatan));
+                    } else {
+                        addRowEditLayanan();
+                    }
+
                     $('#editOrderModal').modal('show');
                 },
                 error: function() {
                     Swal.fire({
                         icon: 'error',
                         title: 'Gagal memuat data',
-                        text: 'Silakan coba lagi.',
                         confirmButtonColor: '#378ADD'
                     });
                 }
             });
         };
 
-        // Toggle delivery di modal edit
+        // Row layanan untuk modal EDIT
+        let editRowCount = 0;
+
+        function addRowEditLayanan(layananId = '', qty = '', catatan = '') {
+            editRowCount++;
+            const id = 'editrow_' + editRowCount;
+
+            let optionsHtml = '<option value="" disabled selected>Pilih layanan</option>';
+            dataLayanan.forEach(l => {
+                const selected = l.id == layananId ? 'selected' : '';
+                optionsHtml += `<option value="${l.id}" data-harga="${l.harga_per_kg}" data-satuan="${l.satuan}" ${selected}>${l.nama_layanan}</option>`;
+            });
+
+            const row = `
+<tr id="${id}">
+    <td><select class="form-select form-select-sm edit-layanan-select" data-row="${id}">${optionsHtml}</select></td>
+    <td><input type="number" class="form-control form-control-sm edit-layanan-qty" data-row="${id}" value="${qty}" placeholder="0" min="0" step="0.01" style="min-width:80px"></td>
+    <td><span class="badge bg-secondary edit-layanan-satuan" id="esatuan_${id}">-</span></td>
+    <td><span id="eharga_${id}">Rp 0</span></td>
+    <td><span class="fw-bold" id="esubtotal_${id}">Rp 0</span></td>
+    <td><input type="text" class="form-control form-control-sm edit-layanan-catatan" data-row="${id}" placeholder="Catatan..." style="min-width:120px"></td>
+    <td><button type="button" class="btn btn-danger btn-sm btnEditRemoveRow" data-row="${id}"><i class="ti ti-trash"></i></button></td>
+</tr>`;
+
+            $('#editBodyLayanan').append(row);
+            if (layananId) $(`#${id} .edit-layanan-select`).trigger('change');
+            if (catatan) $(`#${id} .edit-layanan-catatan`).val(catatan);
+
+        }
+
+        $('#btnEditAddLayanan').on('click', function() {
+            addRowEditLayanan();
+        });
+
+        $(document).on('click', '.btnEditRemoveRow', function() {
+            $('#' + $(this).data('row')).remove();
+            hitungEditTotal();
+        });
+
+        $(document).on('change', '.edit-layanan-select', function() {
+            const rowId = $(this).data('row');
+            const sel = $(this).find(':selected');
+            $(`#esatuan_${rowId}`).text(sel.data('satuan') || '-');
+            $(`#eharga_${rowId}`).text(formatRp(sel.data('harga')));
+            hitungEditSubtotal(rowId);
+        });
+
+        $(document).on('input', '.edit-layanan-qty', function() {
+            hitungEditSubtotal($(this).data('row'));
+        });
+
+        function hitungEditSubtotal(rowId) {
+            const harga = parseFloat($(`#${rowId} .edit-layanan-select`).find(':selected').data('harga')) || 0;
+            const qty = parseFloat($(`#${rowId} .edit-layanan-qty`).val()) || 0;
+            $(`#esubtotal_${rowId}`).text(formatRp(harga * qty));
+            hitungEditTotal();
+        }
+
+        // function hitungEditTotal() {
+        //     let total = 0;
+        //     $('#editBodyLayanan tr').each(function() {
+        //         const rowId = $(this).attr('id');
+        //         const harga = parseFloat($(`#${rowId} .edit-layanan-select`).find(':selected').data('harga')) || 0;
+        //         const qty = parseFloat($(`#${rowId} .edit-layanan-qty`).val()) || 0;
+        //         total += harga * qty;
+        //     });
+
+        //     const delivery = $('#editSwitchDelivery').is(':checked') ?
+        //         parseFloat($('#editInputDelivery').val()) || 0 : 0;
+        //     total += delivery;
+
+        //     $('#editInputHarga').val(total);
+        //     $('#editPreviewHarga').text(total ? formatRp(total) : '');
+        //     $('#editTotalLayanan').text(formatRp(total));
+
+        //     const debit = parseFloat($('#editInputDebit').val()) || 0;
+        //     const kredit = Math.max(0, total - debit);
+        //     $('#editInputKredit').val(kredit);
+        //     $('#editPreviewKredit').text(kredit ? formatRp(kredit) : '');
+        // }
+
+        function hitungEditTotal() {
+            let total = 0;
+            $('#editBodyLayanan tr').each(function() {
+                const rowId = $(this).attr('id');
+                const harga = parseFloat($(`#${rowId} .edit-layanan-select`).find(':selected').data('harga')) || 0;
+                const qty = parseFloat($(`#${rowId} .edit-layanan-qty`).val()) || 0;
+                total += harga * qty;
+            });
+
+            const delivery = $('#editSwitchDelivery').is(':checked') ?
+                parseFloat($('#editInputDelivery').val()) || 0 : 0;
+            total += delivery;
+
+            // Bulatkan ke ribuan terdekat
+            total = Math.round(total / 1000) * 1000;
+
+            $('#editInputHarga').val(total);
+            $('#editPreviewHarga').text(total ? formatRp(total) : '');
+            $('#editTotalLayanan').text(formatRp(total));
+
+            const debit = parseFloat($('#editInputDebit').val()) || 0;
+            const kredit = Math.max(0, total - debit);
+            $('#editInputKredit').val(kredit);
+            $('#editPreviewKredit').text(kredit ? formatRp(kredit) : '');
+        }
+
+        // Toggle delivery edit
         $('#editSwitchDelivery').on('change', function() {
             if ($(this).is(':checked')) {
                 $('#editFieldDelivery').slideDown();
@@ -915,31 +1175,25 @@
                 $('#editFieldDelivery').slideUp();
                 $('#editInputDelivery').val('');
                 $('#editPreviewDelivery').text('');
+                hitungEditTotal();
             }
         });
 
-        $('#editInputDelivery').on('blur', function() {
+        $('#editInputDelivery').on('input', function() {
             $('#editPreviewDelivery').text(formatRp($(this).val()));
+            hitungEditTotal();
         });
 
-        $('#editInputHarga').on('blur', function() {
-            $('#editPreviewHarga').text(formatRp($(this).val()));
-            hitungKreditEdit();
+        $('#editInputDebit').on('input', function() {
+            hitungEditTotal();
         });
-
         $('#editInputDebit').on('blur', function() {
             $('#editPreviewDebit').text(formatRp($(this).val()));
-            hitungKreditEdit();
         });
 
-        function hitungKreditEdit() {
-            const harga = parseFloat($('#editInputHarga').val()) || 0;
-            const debit = parseFloat($('#editInputDebit').val()) || 0;
-            const kredit = Math.max(0, harga - debit);
-            $('#editInputKredit').val(kredit);
-            $('#editPreviewKredit').text(kredit ? formatRp(kredit) : '');
-        }
-
+        // =============================================
+        // UPDATE ORDER
+        // =============================================
         $('#btnUpdate').on('click', function() {
             const requiredFields = [{
                     selector: '#editNoNota',
@@ -950,20 +1204,8 @@
                     label: 'Nama Customer'
                 },
                 {
-                    selector: '#editLayananId',
-                    label: 'Layanan'
-                },
-                {
                     selector: '#editTglMasuk',
                     label: 'Tanggal Masuk'
-                },
-                {
-                    selector: '#editBeratKg',
-                    label: 'Berat'
-                },
-                {
-                    selector: '#editInputHarga',
-                    label: 'Harga'
                 },
             ];
 
@@ -979,9 +1221,40 @@
                 }
             }
 
+            const editDetailLayanan = [];
+            let validEdit = true;
+
+            $('#editBodyLayanan tr').each(function() {
+                const rowId = $(this).attr('id');
+                const layananId = $(`#${rowId} .edit-layanan-select`).val();
+                const harga = parseFloat($(`#${rowId} .edit-layanan-select`).find(':selected').data('harga')) || 0;
+                const qty = parseFloat($(`#${rowId} .edit-layanan-qty`).val()) || 0;
+
+                if (!layananId || qty <= 0) {
+                    validEdit = false;
+                    return false;
+                }
+                editDetailLayanan.push({
+                    layanan_id: layananId,
+                    qty,
+                    harga_satuan: harga,
+                    subtotal: harga * qty,
+                    catatan: $(`#${rowId} .edit-layanan-catatan`).val() || '', // tambah
+                });
+            });
+
+            if (!validEdit || editDetailLayanan.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Isi layanan dan quantity dengan benar!',
+                    confirmButtonColor: '#378ADD'
+                });
+                return;
+            }
+
             Swal.fire({
                 title: 'Simpan Perubahan?',
-                text: 'Pastikan data yang diubah sudah benar.',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#378ADD',
@@ -1001,24 +1274,23 @@
                 $.ajax({
                     url: '<?= base_url("laundry/update") ?>',
                     type: 'POST',
+                    dataType: 'json',
                     data: {
                         id: $('#editOrderId').val(),
                         no_nota: $('#editNoNota').val(),
                         nama_customer: $('#editNamaCustomer').val(),
-                        layanan_id: $('#editLayananId').val(),
-                        is_delivery: $('#editSwitchDelivery').is(':checked') ? 1 : 0,
-                        biaya_delivery: $('#editInputDelivery').val() || 0,
                         tgl_masuk: $('#editTglMasuk').val(),
                         tgl_selesai: $('#editTglSelesai').val(),
-                        berat_kg: $('#editBeratKg').val(),
                         detail_item: $('#editDetailItem').val(),
                         harga: $('#editInputHarga').val(),
                         debit: $('#editInputDebit').val(),
                         kredit: $('#editInputKredit').val(),
                         catatan: $('#editCatatan').val(),
                         status: $('#editStatus').val(),
+                        is_delivery: $('#editSwitchDelivery').is(':checked') ? 1 : 0,
+                        biaya_delivery: $('#editInputDelivery').val() || 0,
+                        detail_layanan: JSON.stringify(editDetailLayanan),
                     },
-                    dataType: 'json',
                     success: function(res) {
                         if (res.status === 'success') {
                             $('#editOrderModal').modal('hide');
@@ -1080,7 +1352,7 @@
                     url: '<?= base_url("laundry/delete") ?>',
                     type: 'POST',
                     data: {
-                        id: id
+                        id
                     },
                     dataType: 'json',
                     success: function(res) {
@@ -1124,7 +1396,7 @@
                 url: '<?= base_url("laundry/getOrder") ?>',
                 type: 'POST',
                 data: {
-                    id: id
+                    id
                 },
                 dataType: 'json',
                 beforeSend: function() {
@@ -1138,27 +1410,19 @@
                 success: function(order) {
                     Swal.close();
                     if (!order) return;
-
                     $('#processOrderId').val(order.id);
                     $('#processOrderInfo').text('#' + String(order.id).padStart(3, '0') + ' — ' + order.nama_customer + ' (' + order.no_nota + ')');
-
-                    // Set radio sesuai status saat ini
                     $('input[name="processStatus"]').prop('checked', false);
                     $('input[name="processStatus"][value="' + order.status + '"]').prop('checked', true);
-
-                    // Highlight label yang aktif
                     updateStatusHighlight();
-
                     $('#processOrderModal').modal('show');
                 }
             });
         };
 
-        // Highlight border label radio status yang dipilih
         function updateStatusHighlight() {
             $('.status-option-label').removeClass('border-primary bg-primary bg-opacity-10');
-            $('input[name="processStatus"]:checked').closest('.status-option-label')
-                .addClass('border-primary bg-primary bg-opacity-10');
+            $('input[name="processStatus"]:checked').closest('.status-option-label').addClass('border-primary bg-primary bg-opacity-10');
         }
 
         $(document).on('change', 'input[name="processStatus"]', function() {
@@ -1189,7 +1453,7 @@
                 type: 'POST',
                 data: {
                     id: $('#processOrderId').val(),
-                    status: status
+                    status
                 },
                 dataType: 'json',
                 success: function(res) {

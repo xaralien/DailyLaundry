@@ -195,14 +195,14 @@ class M_Home extends CI_Model
     {
         $today = date('Y-m-d');
 
-
         $result = $this->db
-            ->select('l.nama_layanan, COUNT(o.id) as total')
-            ->from('orders o')
-            ->join('layanan l', 'l.id = o.layanan_id', 'left')
+            ->select('l.nama_layanan, COUNT(DISTINCT o.id) as total', FALSE)
+            ->from('order_detail d')
+            ->join('layanan l', 'l.id = d.layanan_id', 'left')
+            ->join('orders o', 'o.id = d.order_id', 'left')
             ->where('o.status !=', 'batal')
-            ->where('DATE(tgl_masuk)', $today)
-            ->group_by('o.layanan_id')
+            ->where('DATE(o.tgl_masuk)', $today)
+            ->group_by('d.layanan_id')
             ->get()
             ->result();
 

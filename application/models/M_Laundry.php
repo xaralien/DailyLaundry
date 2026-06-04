@@ -23,9 +23,21 @@ class M_Laundry extends CI_Model
 
     private function _base_query()
     {
-        $this->db->select('o.*, l.nama_layanan')
-            ->from('orders o')
-            ->join('layanan l', 'l.id = o.layanan_id', 'left');
+        $this->db->select("
+        o.*,
+        (
+            SELECT GROUP_CONCAT(l.nama_layanan, ' (', od.qty, ' ', l.satuan, ')' SEPARATOR ', ')
+            FROM order_detail od
+            JOIN layanan l ON l.id = od.layanan_id
+            WHERE od.order_id = o.id
+        ) AS layanan_summary,
+        (
+            SELECT SUM(od.qty)
+            FROM order_detail od
+            WHERE od.order_id = o.id
+        ) AS total_qty
+    ", FALSE)
+            ->from('orders o');
 
         // Search
         if (!empty($_POST['search']['value'])) {
@@ -33,7 +45,6 @@ class M_Laundry extends CI_Model
             $this->db->group_start()
                 ->like('o.no_nota', $search)
                 ->or_like('o.nama_customer', $search)
-                ->or_like('l.nama_layanan', $search)
                 ->or_like('o.detail_item', $search)
                 ->or_like('o.status', $search)
                 ->group_end();
@@ -82,14 +93,31 @@ class M_Laundry extends CI_Model
         return $this->db->where('is_active', 1)->get('layanan')->result();
     }
 
+    public function get_order_details($order_id)
+    {
+        return $this->db->select('od.*, l.nama_layanan, l.satuan')
+            ->from('order_detail od')
+            ->join('layanan l', 'l.id = od.layanan_id', 'left')
+            ->where('od.order_id', $order_id)
+            ->get()->result();
+    }
+
     public function get_order_by_id($id)
     {
-        return $this->db->select('o.*, l.nama_layanan')
+        return $this->db->select('o.*')
             ->from('orders o')
-            ->join('layanan l', 'l.id = o.layanan_id', 'left')
             ->where('o.id', $id)
             ->get()->row();
     }
+
+    // public function get_order_by_id($id)
+    // {
+    //     return $this->db->select('o.*, l.nama_layanan')
+    //         ->from('orders o')
+    //         ->join('layanan l', 'l.id = o.layanan_id', 'left')
+    //         ->where('o.id', $id)
+    //         ->get()->row();
+    // }
 
     public function update_order($id, $data)
     {

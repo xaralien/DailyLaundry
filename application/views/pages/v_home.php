@@ -210,6 +210,13 @@
                 <div class="card-body">
                     <!-- heading -->
                     <h5 class="mb-6">Layanan</h5>
+                    <?php if (empty($layanan)): ?>
+                        <div class="d-flex flex-column align-items-center justify-content-center py-5 text-muted">
+                            <i class="ti ti-wash-machine mb-2" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                            <span class="fw-semibold">Tidak ada cucian hari ini</span>
+                            <small class="mt-1" style="opacity: 0.6;"><?= date('d F Y') ?></small>
+                        </div>
+                    <?php endif; ?>
                     <div id="totalSale" class="d-flex justify-content-center"></div>
                     <!-- table -->
                     <table class="table table-sm table-borderless mb-0 mt-5">
