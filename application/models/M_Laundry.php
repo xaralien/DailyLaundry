@@ -52,12 +52,14 @@ class M_Laundry extends CI_Model
 
         // Order
         $orderCol = $_POST['order'][0]['column'] ?? null;
+        // $orderCol = null;
         if ($orderCol !== null && !empty($this->orderable[$orderCol])) {
             $col = $this->orderable[$orderCol];
             $dir = ($_POST['order'][0]['dir'] ?? 'desc') === 'asc' ? 'ASC' : 'DESC';
             $this->db->order_by($col, $dir);
         } else {
-            $this->db->order_by('o.tgl_masuk', 'DESC');
+            // $this->db->order_by('o.tgl_masuk', 'DESC');
+            $this->db->order_by('o.no_nota', 'ASC');
         }
     }
 

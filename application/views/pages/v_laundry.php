@@ -389,6 +389,35 @@
                         <?php endforeach; ?>
                     </div>
                 </div>
+
+                <!-- Section Pembayaran — muncul hanya saat status "diambil" -->
+                <div id="sectionPembayaran" style="display:none;" class="mt-3">
+                    <hr>
+                    <label class="form-label fw-semibold">Pembayaran</label>
+
+                    <!-- Info sisa tagihan -->
+                    <div class="alert alert-warning py-2 px-3 mb-3 d-flex justify-content-between align-items-center">
+                        <span class="small">Sisa Tagihan</span>
+                        <span class="fw-bold" id="processOrderSisa">Rp 0</span>
+                    </div>
+
+                    <!-- Toggle Lunas -->
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="switchLunas">
+                        <label class="form-check-label fw-semibold" for="switchLunas">Lunas</label>
+                    </div>
+
+                    <!-- Input Nominal — tersembunyi jika Lunas -->
+                    <div id="fieldNominalBayar">
+                        <label class="form-label">Nominal Dibayar</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" class="form-control" id="inputNominalBayar" placeholder="0" min="0">
+                        </div>
+                        <small class="text-muted" id="previewNominalBayar"></small>
+                    </div>
+                </div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-white w-100 w-md-auto" data-bs-dismiss="modal">Batal</button>
@@ -1460,8 +1489,24 @@
                 success: function(order) {
                     Swal.close();
                     if (!order) return;
+
                     $('#processOrderId').val(order.id);
                     $('#processOrderInfo').text('#' + String(order.id).padStart(3, '0') + ' — ' + order.nama_customer + ' (' + order.no_nota + ')');
+
+                    // Simpan sisa tagihan (kredit) ke data attr
+                    const sisa = parseFloat(order.kredit) || 0;
+                    $('#processOrderModal').data('kredit', sisa);
+                    $('#processOrderModal').data('harga', parseFloat(order.harga) || 0);
+                    $('#processOrderModal').data('debit', parseFloat(order.debit) || 0);
+                    $('#processOrderSisa').text(formatRp(sisa));
+
+                    // Reset section pembayaran
+                    $('#sectionPembayaran').hide();
+                    $('#switchLunas').prop('checked', false);
+                    $('#fieldNominalBayar').show();
+                    $('#inputNominalBayar').val('');
+                    $('#previewNominalBayar').text('');
+
                     $('input[name="processStatus"]').prop('checked', false);
                     $('input[name="processStatus"][value="' + order.status + '"]').prop('checked', true);
                     updateStatusHighlight();
@@ -1470,14 +1515,42 @@
             });
         };
 
+        // Tampilkan/sembunyikan section pembayaran saat pilih status
+        $(document).on('change', 'input[name="processStatus"]', function() {
+            updateStatusHighlight();
+            const sisa = $('#processOrderModal').data('kredit') || 0;
+            if ($(this).val() === 'diambil' && sisa > 0) {
+                $('#sectionPembayaran').slideDown();
+            } else {
+                $('#sectionPembayaran').slideUp();
+                $('#switchLunas').prop('checked', false);
+                $('#fieldNominalBayar').show();
+                $('#inputNominalBayar').val('');
+                $('#previewNominalBayar').text('');
+            }
+        });
+
+        // Toggle Lunas — sembunyikan input nominal, isi otomatis dengan sisa
+        $('#switchLunas').on('change', function() {
+            if ($(this).is(':checked')) {
+                $('#fieldNominalBayar').slideUp();
+                $('#inputNominalBayar').val($('#processOrderModal').data('kredit') || 0);
+            } else {
+                $('#fieldNominalBayar').slideDown();
+                $('#inputNominalBayar').val('');
+                $('#previewNominalBayar').text('');
+            }
+        });
+
+        $('#inputNominalBayar').on('input', function() {
+            const val = parseFloat($(this).val()) || 0;
+            $('#previewNominalBayar').text(val ? formatRp(val) : '');
+        });
+
         function updateStatusHighlight() {
             $('.status-option-label').removeClass('border-primary bg-primary bg-opacity-10');
             $('input[name="processStatus"]:checked').closest('.status-option-label').addClass('border-primary bg-primary bg-opacity-10');
         }
-
-        $(document).on('change', 'input[name="processStatus"]', function() {
-            updateStatusHighlight();
-        });
 
         $('#btnProcessOrder').on('click', function() {
             const status = $('input[name="processStatus"]:checked').val();
@@ -1491,6 +1564,31 @@
                 return;
             }
 
+            // Hitung debit & kredit baru jika status diambil
+            let extraData = {};
+            if (status === 'diambil') {
+                const sisa = parseFloat($('#processOrderModal').data('kredit')) || 0;
+                const debitLama = parseFloat($('#processOrderModal').data('debit')) || 0;
+                const isLunas = $('#switchLunas').is(':checked');
+                const nominal = isLunas ? sisa : (parseFloat($('#inputNominalBayar').val()) || 0);
+
+                if (sisa > 0 && !isLunas && nominal <= 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Peringatan',
+                        text: 'Masukkan nominal pembayaran atau centang Lunas.',
+                        confirmButtonColor: '#378ADD'
+                    });
+                    return;
+                }
+
+                const sisaBaru = Math.max(0, sisa - nominal);
+                extraData = {
+                    tambah_debit: nominal,
+                    kredit_baru: sisaBaru,
+                };
+            }
+
             Swal.fire({
                 title: 'Memperbarui status...',
                 allowOutsideClick: false,
@@ -1501,10 +1599,10 @@
             $.ajax({
                 url: '<?= base_url("laundry/processOrder") ?>',
                 type: 'POST',
-                data: {
+                data: Object.assign({
                     id: $('#processOrderId').val(),
                     status
-                },
+                }, extraData),
                 dataType: 'json',
                 success: function(res) {
                     if (res.status === 'success') {

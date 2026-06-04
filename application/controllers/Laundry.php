@@ -262,7 +262,22 @@ class Laundry extends CI_Controller
 		$id     = $this->input->post('id');
 		$status = $this->input->post('status');
 
-		if ($this->M_Laundry->update_status($id, $status)) {
+		$updateData = ['status' => $status];
+
+		// Jika diambil dan ada pembayaran tambahan
+		if ($status === 'diambil') {
+			$tambahDebit = (float) ($this->input->post('tambah_debit') ?? 0);
+			$kreditBaru  = (float) ($this->input->post('kredit_baru')  ?? 0);
+
+			if ($tambahDebit > 0) {
+				// Ambil debit lama lalu tambah
+				$order = $this->M_Laundry->get_order_by_id($id);
+				$updateData['debit']  = ($order->debit ?? 0) + $tambahDebit;
+				$updateData['kredit'] = $kreditBaru;
+			}
+		}
+
+		if ($this->M_Laundry->update_order($id, $updateData)) {
 			echo json_encode(['status' => 'success', 'message' => 'Status berhasil diperbarui']);
 		} else {
 			echo json_encode(['status' => 'error', 'message' => 'Gagal memperbarui status']);
