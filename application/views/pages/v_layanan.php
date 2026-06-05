@@ -64,13 +64,21 @@
                         <label class="form-label">Nama Layanan</label>
                         <input type="text" class="form-control" id="addNamaLayanan" placeholder="Contoh: Reguler">
                     </div>
-                    <div class="col-12">
-                        <label class="form-label">Harga per Kg</label>
+                    <div class="col-6">
+                        <label class="form-label">Harga per Satuan</label>
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
                             <input type="number" class="form-control" id="addHargaPerKg" placeholder="0" min="0">
                         </div>
                         <small class="text-muted" id="addPreviewHarga"></small>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Satuan</label>
+                        <select class="form-select" id="addSatuan">
+                            <option value="kg">kg</option>
+                            <option value="pcs">pcs</option>
+                            <option value="item">item</option>
+                        </select>
                     </div>
                     <div class="col-12">
                         <label class="form-label">Status</label>
@@ -106,13 +114,21 @@
                         <label class="form-label">Nama Layanan</label>
                         <input type="text" class="form-control" id="editNamaLayanan" placeholder="Contoh: Reguler">
                     </div>
-                    <div class="col-12">
-                        <label class="form-label">Harga per Kg</label>
+                    <div class="col-6">
+                        <label class="form-label">Harga per Satuan</label>
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
                             <input type="number" class="form-control" id="editHargaPerKg" placeholder="0" min="0">
                         </div>
                         <small class="text-muted" id="editPreviewHarga"></small>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Satuan</label>
+                        <select class="form-select" id="editSatuan">
+                            <option value="kg">kg</option>
+                            <option value="pcs">pcs</option>
+                            <option value="item">item</option>
+                        </select>
                     </div>
                     <div class="col-12">
                         <label class="form-label">Status</label>
@@ -153,7 +169,8 @@
                             <tr>
                                 <th>#</th>
                                 <th>Nama Layanan</th>
-                                <th>Harga / Kg</th>
+                                <th>Satuan</th> <!-- tambah -->
+                                <th>Harga / Satuan</th>
                                 <th>Status</th>
                                 <th>Dibuat</th>
                                 <th>Aksi</th>
@@ -188,8 +205,8 @@
             },
             columnDefs: [{
                     orderable: false,
-                    targets: [0, 5]
-                },
+                    targets: [0, 6]
+                }, // 5 -> 6
                 {
                     width: '5%',
                     targets: 0
@@ -199,21 +216,25 @@
                     targets: 1
                 },
                 {
-                    width: '20%',
+                    width: '10%',
                     targets: 2
-                },
+                }, // Satuan baru
+                {
+                    width: '20%',
+                    targets: 3
+                }, // Harga
                 {
                     width: '10%',
-                    targets: 3
-                },
-                {
-                    width: '20%',
                     targets: 4
-                },
+                }, // Status
                 {
                     width: '15%',
                     targets: 5
-                },
+                }, // Dibuat
+                {
+                    width: '10%',
+                    targets: 6
+                }, // Aksi
             ],
             language: {
                 search: "Cari:",
@@ -242,6 +263,7 @@
             $('#addNamaLayanan').val('');
             $('#addHargaPerKg').val('');
             $('#addPreviewHarga').text('');
+            $('#addSatuan').val('kg'); // tambah
             $('#addIsActive').val('1');
         });
 
@@ -282,6 +304,7 @@
                     data: {
                         nama_layanan: $('#addNamaLayanan').val(),
                         harga_per_kg: $('#addHargaPerKg').val() || 0,
+                        satuan: $('#addSatuan').val(), // tambah
                         is_active: $('#addIsActive').val(),
                     },
                     dataType: 'json',
@@ -350,6 +373,7 @@
                     $('#editNamaLayanan').val(data.nama_layanan);
                     $('#editHargaPerKg').val(data.harga_per_kg);
                     $('#editPreviewHarga').text(formatRp(data.harga_per_kg));
+                    $('#editSatuan').val(data.satuan); // tambah
                     $('#editIsActive').val(data.is_active);
                     $('#editLayananModal').modal('show');
                 },
@@ -398,6 +422,7 @@
                         id: $('#editLayananId').val(),
                         nama_layanan: $('#editNamaLayanan').val(),
                         harga_per_kg: $('#editHargaPerKg').val() || 0,
+                        satuan: $('#editSatuan').val(), // tambah
                         is_active: $('#editIsActive').val(),
                     },
                     dataType: 'json',

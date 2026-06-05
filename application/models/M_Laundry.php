@@ -171,4 +171,52 @@ class M_Laundry extends CI_Model
             'diambil'          => $count['diambil'],
         ];
     }
+
+    public function get_export($dari, $sampai)
+    {
+        return $this->db
+            ->select("
+            o.*,
+            (
+                SELECT GROUP_CONCAT(l.nama_layanan, ' (', od.qty, ' ', l.satuan, ')' SEPARATOR ', ')
+                FROM order_detail od
+                JOIN layanan l ON l.id = od.layanan_id
+                WHERE od.order_id = o.id
+            ) AS layanan_summary,
+            (
+                SELECT SUM(od.qty)
+                FROM order_detail od
+                WHERE od.order_id = o.id
+            ) AS total_qty
+        ", FALSE)
+            ->from('orders o')
+            ->where('DATE(o.tgl_masuk) >=', $dari)
+            ->where('DATE(o.tgl_masuk) <=', $sampai)
+            ->where('o.status !=', 'batal')
+            ->order_by('o.tgl_masuk', 'ASC')
+            ->order_by('o.id', 'ASC')
+            ->get()
+            ->result();
+    }
+
+    public function get_rekap_per_layanan($dari, $sampai)
+    {
+        return $this->db
+            ->select('
+            l.nama_layanan,
+            l.satuan,
+            SUM(od.qty)                    AS total_qty,
+            SUM(od.qty * od.harga_satuan)  AS total_harga
+        ', FALSE)
+            ->from('order_detail od')
+            ->join('layanan l',  'l.id  = od.layanan_id', 'left')
+            ->join('orders o',   'o.id  = od.order_id',   'left')
+            ->where('DATE(o.tgl_masuk) >=', $dari)
+            ->where('DATE(o.tgl_masuk) <=', $sampai)
+            ->where('o.status !=', 'batal')
+            ->group_by('od.layanan_id')
+            ->order_by('total_qty', 'DESC')
+            ->get()
+            ->result();
+    }
 }

@@ -543,9 +543,21 @@
                     <div>
                         <h5 class="mb-0">Cucian</h5>
                     </div>
-                    <a href="#!" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#tambahOrderModal">
+                    <div class="d-flex gap-2 align-items-center">
+                        <!-- Filter tanggal -->
+                        <input type="date" class="form-control form-control-sm" id="exportTglDari" style="max-width:150px">
+                        <span class="text-muted small">s/d</span>
+                        <input type="date" class="form-control form-control-sm" id="exportTglSampai" style="max-width:150px">
+                        <button type="button" class="btn btn-success btn-sm" id="btnExport">
+                            <i class="ti ti-file-spreadsheet me-1"></i> Export
+                        </button>
+                        <a href="#!" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#tambahOrderModal">
+                            <i class="ti ti-plus me-1"></i> Tambah
+                        </a>
+                    </div>
+                    <!-- <a href="#!" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#tambahOrderModal">
                         <i class="ti ti-plus me-1"></i> Tambah
-                    </a>
+                    </a> -->
                 </div>
                 <!-- table -->
                 <!-- <div class="table-responsive"> -->
@@ -663,6 +675,10 @@
             return 'Rp ' + ribu + 'k';
         };
 
+        function bulatkan(val) {
+            return Math.round(val / 1000) * 1000;
+        }
+
         // =============================================
         // DATATABLE
         // =============================================
@@ -676,7 +692,7 @@
             },
             columnDefs: [{
                 orderable: false,
-                targets: [7, 12, 13]
+                targets: [7, 13]
             }, ],
             language: {
                 search: "Cari:",
@@ -782,10 +798,12 @@
         });
 
         function hitungSubtotal(rowId) {
-            const harga = parseFloat($(`#harga_${rowId}`).val()) || 0; // ambil dari input
+            const harga = parseFloat($(`#harga_${rowId}`).val()) || 0;
             const qty = parseFloat($(`#${rowId} .layanan-qty`).val()) || 0;
-            const subtotal = harga * qty;
+            const subtotal = bulatkan(harga * qty); // bulatkan per subtotal
             $(`#subtotal_${rowId}`).text(formatRp(subtotal));
+            // Simpan subtotal yang sudah dibulatkan ke data attribute
+            $(`#subtotal_${rowId}`).data('val', subtotal);
             hitungTotal();
         }
 
@@ -815,15 +833,15 @@
             let total = 0;
             $('#bodyLayanan tr').each(function() {
                 const rowId = $(this).attr('id');
-                const harga = parseFloat($(`#harga_${rowId}`).val()) || 0; // dari input
-                const qty = parseFloat($(`#${rowId} .layanan-qty`).val()) || 0;
-                total += harga * qty;
+                // Ambil dari data attribute yang sudah dibulatkan
+                const subtotal = parseFloat($(`#subtotal_${rowId}`).data('val')) || 0;
+                total += subtotal;
             });
 
             const delivery = $('#switchDelivery').is(':checked') ?
                 parseFloat($('#inputDelivery').val()) || 0 : 0;
             total += delivery;
-            total = Math.round(total / 1000) * 1000;
+            // Tidak perlu bulatkan lagi karena subtotal sudah dibulatkan
 
             $('#inputHarga').val(total);
             $('#previewHarga').text(total ? formatRp(total) : '');
@@ -1195,7 +1213,9 @@
         function hitungEditSubtotal(rowId) {
             const harga = parseFloat($(`#eharga_${rowId}`).val()) || 0;
             const qty = parseFloat($(`#${rowId} .edit-layanan-qty`).val()) || 0;
-            $(`#esubtotal_${rowId}`).text(formatRp(harga * qty));
+            const subtotal = bulatkan(harga * qty);
+            $(`#esubtotal_${rowId}`).text(formatRp(subtotal));
+            $(`#esubtotal_${rowId}`).data('val', subtotal);
             hitungEditTotal();
         }
 
@@ -1226,15 +1246,13 @@
             let total = 0;
             $('#editBodyLayanan tr').each(function() {
                 const rowId = $(this).attr('id');
-                const harga = parseFloat($(`#eharga_${rowId}`).val()) || 0; // dari input
-                const qty = parseFloat($(`#${rowId} .edit-layanan-qty`).val()) || 0;
-                total += harga * qty;
+                const subtotal = parseFloat($(`#esubtotal_${rowId}`).data('val')) || 0;
+                total += subtotal;
             });
 
             const delivery = $('#editSwitchDelivery').is(':checked') ?
                 parseFloat($('#editInputDelivery').val()) || 0 : 0;
             total += delivery;
-            total = Math.round(total / 1000) * 1000;
 
             $('#editInputHarga').val(total);
             $('#editPreviewHarga').text(total ? formatRp(total) : '');
@@ -1707,6 +1725,39 @@
                 }
             });
         };
+
+        // Set default tanggal export = hari ini
+        const today = new Date().toISOString().split('T')[0];
+        $('#exportTglDari').val(today);
+        $('#exportTglSampai').val(today);
+
+        $('#btnExport').on('click', function() {
+            const dari = $('#exportTglDari').val();
+            const sampai = $('#exportTglSampai').val();
+
+            if (!dari || !sampai) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Pilih tanggal terlebih dahulu!',
+                    confirmButtonColor: '#378ADD'
+                });
+                return;
+            }
+
+            if (dari > sampai) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Tanggal dari tidak boleh lebih besar dari tanggal sampai!',
+                    confirmButtonColor: '#378ADD'
+                });
+                return;
+            }
+
+            // Buka URL export di tab baru
+            window.open('<?= base_url("laundry/export") ?>?dari=' + dari + '&sampai=' + sampai, '_blank');
+        });
 
     });
 </script>

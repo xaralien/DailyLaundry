@@ -28,6 +28,7 @@ class Layanan extends CI_Controller
 			$data[] = [
 				$i + 1,
 				$r->nama_layanan,
+				'<span class="badge bg-secondary">' . $r->satuan . '</span>',  // tambah
 				'Rp ' . number_format($r->harga_per_kg, 0, ',', '.'),
 				$badgeActive,
 				date('d M Y H:i', strtotime($r->created_at)),

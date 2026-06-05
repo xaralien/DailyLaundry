@@ -1,6 +1,8 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+use Shuchkin\SimpleXLSXGen;
+
 class Laundry extends CI_Controller
 {
 	public function __construct()
@@ -79,7 +81,9 @@ class Laundry extends CI_Controller
 				$r->detail_item ?? '-',
 				'<span style="min-width:80px;display:inline-block" title="Rp ' . number_format($r->harga, 0, ',', '.') . '">' . 'Rp ' . round($r->harga / 1000) . 'k</span>',
 				'<span style="min-width:80px;display:inline-block" title="Rp ' . number_format($r->debit, 0, ',', '.') . '">' . 'Rp ' . round($r->debit / 1000) . 'k</span>',
-				'<span style="min-width:80px;display:inline-block" title="Rp ' . number_format($r->kredit, 0, ',', '.') . '">' . 'Rp ' . round($r->kredit / 1000) . 'k</span>',
+				$r->kredit > 0
+					? '<span style="min-width:80px;display:inline-block" class="btn btn-sm btn-outline-danger" title="Rp ' . number_format($r->kredit, 0, ',', '.') . '">' . 'Rp ' . round($r->kredit / 1000) . 'k</span>'
+					: '<span style="min-width:80px;display:inline-block" class="btn btn-sm btn-outline-success" title="LUNAS">LUNAS</span>',
 				$delivery,
 				"<span class='badge {$statusClass}'>" . ucwords(str_replace('_', ' ', $r->status)) . "</span>",
 				$btn_prosses . "<a href='#' class='btn btn-sm btn-outline-warning' onclick='editOrder(" . $r->id . ")'>Edit</a> <a href='#' class='btn btn-sm btn-outline-danger' onclick='deleteOrder(" . $r->id . ")'>Delete</a>",
@@ -290,5 +294,298 @@ class Laundry extends CI_Controller
 		$this->output
 			->set_content_type('application/json')
 			->set_output(json_encode($summary));
+	}
+
+	public function export()
+	{
+		require_once APPPATH . 'third_party/SimpleXLSXGen.php';
+
+		$dari   = $this->input->get('dari')   ?: date('Y-m-d');
+		$sampai = $this->input->get('sampai') ?: date('Y-m-d');
+
+		$results = $this->M_Laundry->get_export($dari, $sampai);
+
+		$tglDari   = date('d/m/Y', strtotime($dari));
+		$tglSampai = date('d/m/Y', strtotime($sampai));
+
+		$fmt = function ($val) {
+			return '<top><style border="thin" align="right">Rp. ' . number_format((float)$val, 0, ',', '.') . '</style></top>';
+		};
+
+		$fmtQty = function ($val) {
+			$num = rtrim(rtrim(number_format((float)$val, 2, ',', '.'), '0'), ',');
+			return '<top><style border="thin" align="right">' . $num . '</style></top>';
+		};
+
+		$data = [];
+
+		// =============================================
+		// TITLE
+		// =============================================
+		// Title rows — 16 kolom
+		$data[] = ['<b>LAPORAN LAUNDRY INERBANG</b>', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+		$data[] = ["Periode: $tglDari s/d $tglSampai", '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+		$data[] = ['Dicetak: ' . date('d/m/Y H:i'), '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+		$data[] = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+
+		// =============================================
+		// HEADER — bgcolor biru, teks putih, bold, border
+		// =============================================
+		$h = function ($text) {
+			return '<style bgcolor="#378ADD" color="#FFFFFF" border="thin">' . '<b>' . $text . '</b>' . '</style>';
+		};
+
+		$data[] = [
+			$h('No'),
+			$h('Order ID'),
+			$h('No Nota'),
+			$h('Nama Customer'),
+			$h('Tgl Masuk'),
+			$h('Tgl Selesai'),
+			$h('Layanan'),
+			$h('Total Qty'),
+			$h('Detail Item'),
+			$h('Delivery'),
+			$h('Harga'),
+			$h('Biaya Delivery'),
+			$h('Total'),
+			$h('Dibayar'),
+			$h('Sisa'),
+			$h('Status'),
+		];
+
+		// =============================================
+		// DATA — border thin, top align, wrap text
+		// =============================================
+		$no           = 1;
+		$totalHarga   = 0;
+		$totalDibayar = 0;
+		$totalSisa    = 0;
+		$totalBiayaDelivery = 0;  // tambah
+
+		foreach ($results as $r) {
+			$details    = $this->M_Laundry->get_order_details($r->id);
+			$layananStr = '';
+			foreach ($details as $d) {
+				$layananStr .= $d->nama_layanan . ' (' . $d->qty . ' ' . $d->satuan . ')';
+				if ($d->catatan) $layananStr .= ' - ' . $d->catatan;
+				$layananStr .= "\n";
+			}
+
+			$totalHarga   += (float) $r->harga;
+			$totalDibayar += (float) $r->debit;
+			$totalSisa    += (float) $r->kredit;
+			$totalBiayaDelivery += (float) $r->biaya_delivery;  // tambah
+
+			// Wrap teks + top align + border untuk setiap cell
+			$c = function ($val, $wrap = false, $align = 'left') {
+				$inner = $wrap ? '<wraptext>' . $val . '</wraptext>' : $val;
+				return '<top><style border="thin" align="' . $align . '">' . $inner . '</style></top>';
+			};
+
+			$data[] = [
+				$c($no++),
+				$c('#' . str_pad($r->id, 3, '0', STR_PAD_LEFT)),
+				$c($r->no_nota),
+				$c($r->nama_customer),
+				$c(date('d/m/Y', strtotime($r->tgl_masuk))),
+				$c($r->tgl_selesai ? date('d/m/Y', strtotime($r->tgl_selesai)) : '-'),
+				$c(trim($layananStr), true),
+				$fmtQty($r->total_qty),                                        // tanpa $c
+				$c($r->detail_item ?? '-'),
+				$c($r->is_delivery ? 'Ya' : 'Tidak'),
+				$fmt((float)$r->harga - (float)$r->biaya_delivery),           // tanpa $c
+				$fmt($r->biaya_delivery),                                       // tanpa $c
+				$fmt($r->harga),                                                // tanpa $c
+				$fmt($r->debit),                                                // tanpa $c
+				$fmt($r->kredit),                                               // tanpa $c
+				$c(ucwords(str_replace('_', ' ', $r->status))),
+			];
+		}
+
+		// =============================================
+		// TOTAL ROW
+		// =============================================
+		$t = function ($val, $align = 'left') {
+			return '<style bgcolor="#EEF4FF" border="thin" align="' . $align . '"><b>' . $val . '</b></style>';
+		};
+
+		// Sheet 1 total
+		$data[] = [
+			$t(''),
+			$t(''),
+			$t(''),
+			$t(''),
+			$t(''),
+			$t(''),
+			$t(''),
+			$t(''),
+			$t('TOTAL'),
+			$t(''),
+			'<style bgcolor="#EEF4FF" border="thin" align="right"><b>Rp. ' . number_format($totalHarga - $totalBiayaDelivery, 0, ',', '.') . '</b></style>',
+			'<style bgcolor="#EEF4FF" border="thin" align="right"><b>Rp. ' . number_format($totalBiayaDelivery, 0, ',', '.') . '</b></style>',
+			'<style bgcolor="#EEF4FF" border="thin" align="right"><b>Rp. ' . number_format($totalHarga, 0, ',', '.') . '</b></style>',
+			'<style bgcolor="#EEF4FF" border="thin" align="right"><b>Rp. ' . number_format($totalDibayar, 0, ',', '.') . '</b></style>',
+			'<style bgcolor="#EEF4FF" border="thin" align="right"><b>Rp. ' . number_format($totalSisa, 0, ',', '.') . '</b></style>',
+			$t(''),
+		];
+
+		// =============================================
+		// BUILD XLSX
+		// =============================================
+		$xlsx = SimpleXLSXGen::fromArray($data);
+
+		$xlsx->mergeCells('A1:P1');
+		$xlsx->mergeCells('A2:P2');
+		$xlsx->mergeCells('A3:P3');
+
+		$xlsx->setColWidth(1, 5);
+		$xlsx->setColWidth(2, 10);
+		$xlsx->setColWidth(3, 18);
+		$xlsx->setColWidth(4, 20);
+		$xlsx->setColWidth(5, 13);
+		$xlsx->setColWidth(6, 13);
+		$xlsx->setColWidth(7, 35);
+		$xlsx->setColWidth(8, 10);
+		$xlsx->setColWidth(9, 20);
+		$xlsx->setColWidth(10, 10); // Delivery
+		$xlsx->setColWidth(11, 14); // Harga
+		$xlsx->setColWidth(12, 15); // Biaya Delivery
+		$xlsx->setColWidth(13, 14); // Total
+		$xlsx->setColWidth(14, 14); // Dibayar
+		$xlsx->setColWidth(15, 14); // Sisa
+		$xlsx->setColWidth(16, 15); // Status
+
+		// =============================================
+		// SHEET 2 — REKAP PER ORDER
+		// =============================================
+
+		$data2 = [];
+
+		$data2[] = ['<b>REKAP PER ORDER PER LAYANAN</b>', '', '', '', '', '', '', ''];
+		$data2[] = ["Periode: $tglDari s/d $tglSampai", '', '', '', '', '', '', ''];
+		$data2[] = ['', '', '', '', '', '', '', ''];
+
+		$data2[] = [
+			$h('No'),
+			$h('No Nota'),
+			$h('Nama Customer'),
+			$h('Layanan'),
+			$h('Qty'),
+			$h('Satuan'),
+			$h('Harga/Satuan'),
+			$h('Subtotal'),
+		];
+
+		$no2         = 1;
+		$grandSubtotal = 0;
+
+		foreach ($results as $r) {
+			$details = $this->M_Laundry->get_order_details($r->id);
+
+			foreach ($details as $d) {
+				$subtotal       = (float) $d->qty * (float) $d->harga_satuan;
+				$grandSubtotal += $subtotal;
+
+				$data2[] = [
+					$c($no2++),
+					$c($r->no_nota),
+					$c($r->nama_customer),
+					$c($d->nama_layanan),
+					$fmtQty($d->qty),        // tanpa $c
+					$c($d->satuan),
+					$fmt($d->harga_satuan),  // tanpa $c
+					$fmt($subtotal),          // tanpa $c
+				];
+			}
+		}
+
+		$data2[] = [
+			$t(''),
+			$t(''),
+			$t(''),
+			$t(''),
+			$t(''),
+			$t(''),
+			$t('TOTAL'),
+			'<style bgcolor="#EEF4FF" border="thin" align="right"><b>Rp. ' . number_format($grandSubtotal, 0, ',', '.') . '</b></style>',
+		];
+
+		$xlsx->addSheet($data2, 'Detail Per Layanan');
+
+		$xlsx->setColWidth(1, 5);
+		$xlsx->setColWidth(2, 18);
+		$xlsx->setColWidth(3, 20);
+		$xlsx->setColWidth(4, 20);
+		$xlsx->setColWidth(5, 10);
+		$xlsx->setColWidth(6, 10);
+		$xlsx->setColWidth(7, 15);
+		$xlsx->setColWidth(8, 15);
+
+		$xlsx->mergeCells('A1:H1');
+		$xlsx->mergeCells('A2:H2');
+
+		// =============================================
+		// SHEET 3 — REKAP PER LAYANAN
+		// =============================================
+		$rekapLayanan = $this->M_Laundry->get_rekap_per_layanan($dari, $sampai);
+
+		$data3 = [];
+
+		// Title
+		$data3[] = ['<b>REKAP PER LAYANAN</b>', '', '', '', ''];
+		$data3[] = ["Periode: $tglDari s/d $tglSampai", '', '', '', ''];
+		$data3[] = ['', '', '', '', ''];
+
+		// Header
+		$data3[] = [
+			$h('No'),
+			$h('Layanan'),
+			$h('Satuan'),
+			$h('Total Qty'),
+			$h('Total Harga'),
+		];
+
+		$no2         = 1;
+		$grandQty    = 0;
+		$grandHarga  = 0;
+
+		foreach ($rekapLayanan as $rl) {
+			$grandQty   += (float) $rl->total_qty;
+			$grandHarga += (float) $rl->total_harga;
+
+			$data3[] = [
+				$c($no2++),
+				$c($rl->nama_layanan),
+				$c($rl->satuan),
+				$fmtQty($rl->total_qty),  // tanpa $c
+				$fmt($rl->total_harga),   // tanpa $c
+			];
+		}
+
+		// Sheet 3 total
+		$data3[] = [
+			$t(''),
+			$t('TOTAL'),
+			$t(''),
+			'<style bgcolor="#EEF4FF" border="thin" align="right"><b>' . rtrim(rtrim(number_format($grandQty, 2, ',', '.'), '0'), ',') . '</b></style>',
+			'<style bgcolor="#EEF4FF" border="thin" align="right"><b>Rp. ' . number_format($grandHarga, 0, ',', '.') . '</b></style>',
+		];
+
+		$xlsx->addSheet($data3, 'Rekap Layanan');
+
+		$xlsx->setColWidth(1, 5);
+		$xlsx->setColWidth(2, 25);
+		$xlsx->setColWidth(3, 10);
+		$xlsx->setColWidth(4, 12);
+		$xlsx->setColWidth(5, 15);
+
+		$xlsx->mergeCells('A1:E1');
+		$xlsx->mergeCells('A2:E2');
+
+
+
+		$namaFile = 'Laporan_Laundry_' . date('d-m-Y', strtotime($dari)) . '_sd_' . date('d-m-Y', strtotime($sampai));
+		$xlsx->downloadAs($namaFile . '.xlsx');
 	}
 }
