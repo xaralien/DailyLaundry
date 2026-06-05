@@ -78,7 +78,7 @@ class M_Home extends CI_Model
 
         // Orderan masuk hari ini
         $orderan_hari_ini = $this->db
-            ->where('DATE(tgl_masuk)', $today)
+            ->where('DATE(tgl_selesai)', $today)
             ->where('status !=', 'batal')
             ->count_all_results($this->table);
 
@@ -87,14 +87,14 @@ class M_Home extends CI_Model
         $count    = [];
         foreach ($statuses as $s) {
             $count[$s] = $this->db
-                ->where('DATE(tgl_masuk)', $today)
+                ->where('DATE(tgl_selesai)', $today)
                 ->where('status', $s)
                 ->count_all_results($this->table);
         }
 
         // "Belum diproses" hari ini = masuk hari ini & status masih 'proses'
         $belum_diproses = $this->db
-            ->where('DATE(tgl_masuk)', $today)
+            ->where('DATE(tgl_selesai)', $today)
             ->where('status', 'proses')
             ->count_all_results($this->table);
 
@@ -114,7 +114,7 @@ class M_Home extends CI_Model
 
         $result = $this->db
             ->select_sum('debit')
-            ->where('DATE(tgl_masuk)', $today)
+            ->where('DATE(tgl_selesai)', $today)
             ->where('status', 'diambil')
             ->get($this->table)  // ← ini yang hilang
             ->row();
@@ -122,64 +122,47 @@ class M_Home extends CI_Model
         return $result->debit ?? 0;
     }
 
-    public function get_debit()
+    public function get_debit($year = null)
     {
-        $today = date('Y-m-d');
+        $year  = $year ?: date('Y');
+        $month = date('m');
 
         $result = $this->db
             ->select_sum('debit')
-            ->where('DATE(tgl_masuk)', $today)
+            ->where('MONTH(tgl_selesai)', $month)
+            ->where('YEAR(tgl_selesai)', $year)
             ->where('status', 'diambil')
-            ->get($this->table)  // ← ini yang hilang
+            ->get($this->table)
             ->row();
 
         return $result->debit ?? 0;
     }
 
-    public function get_credit()
+    public function get_credit($year = null)
     {
-        $today = date('Y-m-d');
+        $year  = $year ?: date('Y');
+        $month = date('m');
 
         $result = $this->db
             ->select_sum('kredit')
-            ->where('DATE(tgl_masuk)', $today)
+            ->where('MONTH(tgl_selesai)', $month)
+            ->where('YEAR(tgl_selesai)', $year)
             ->where('status', 'diambil')
-            ->get($this->table)  // ← ini yang hilang
+            ->get($this->table)
             ->row();
 
         return $result->kredit ?? 0;
     }
 
-    public function get_income_per_bulan()
+    public function get_income_per_bulan($year = null)
     {
-        $year = date('Y');
+        $year = $year ?: date('Y');
 
         $result = $this->db
-            ->select("MONTH(tgl_masuk) as bulan, SUM(debit) as total")
-            ->where('YEAR(tgl_masuk)', $year)
+            ->select("MONTH(tgl_selesai) as bulan, SUM(debit) as total")
+            ->where('YEAR(tgl_selesai)', $year)
             ->where('status', 'diambil')
-            ->group_by('MONTH(tgl_masuk)')
-            ->get($this->table)
-            ->result();
-
-        // Siapkan array 12 bulan default 0
-        $data = array_fill(1, 12, 0);
-        foreach ($result as $r) {
-            $data[(int)$r->bulan] = (int)$r->total;
-        }
-
-        return array_values($data); // index 0–11
-    }
-
-    public function get_kredit_per_bulan()
-    {
-        $year = date('Y');
-
-        $result = $this->db
-            ->select("MONTH(tgl_masuk) as bulan, SUM(kredit) as total")
-            ->where('YEAR(tgl_masuk)', $year)
-            ->where('status', 'diambil')
-            ->group_by('MONTH(tgl_masuk)')
+            ->group_by('MONTH(tgl_selesai)')
             ->get($this->table)
             ->result();
 
@@ -191,17 +174,52 @@ class M_Home extends CI_Model
         return array_values($data);
     }
 
+    public function get_kredit_per_bulan($year = null)
+    {
+        $year = $year ?: date('Y');
+
+        $result = $this->db
+            ->select("MONTH(tgl_selesai) as bulan, SUM(kredit) as total")
+            ->where('YEAR(tgl_selesai)', $year)
+            ->where('status', 'diambil')
+            ->group_by('MONTH(tgl_selesai)')
+            ->get($this->table)
+            ->result();
+
+        $data = array_fill(1, 12, 0);
+        foreach ($result as $r) {
+            $data[(int)$r->bulan] = (int)$r->total;
+        }
+
+        return array_values($data);
+    }
+
+    // Ambil tahun yang tersedia di database
+    public function get_available_years()
+    {
+        $result = $this->db
+            ->select("DISTINCT YEAR(tgl_selesai) as tahun")
+            ->where('status', 'diambil')
+            ->order_by('tahun', 'DESC')
+            ->get($this->table)
+            ->result();
+
+        return array_column((array)$result, 'tahun');
+    }
+
     public function get_order_per_layanan()
     {
         $today = date('Y-m-d');
+        $month = date('m');
 
         $result = $this->db
-            ->select('l.nama_layanan, COUNT(DISTINCT o.id) as total', FALSE)
+            ->select('l.nama_layanan, COUNT(DISTINCT d.id) as total', FALSE)
             ->from('order_detail d')
             ->join('layanan l', 'l.id = d.layanan_id', 'left')
             ->join('orders o', 'o.id = d.order_id', 'left')
             ->where('o.status !=', 'batal')
-            ->where('DATE(o.tgl_masuk)', $today)
+            // ->where('DATE(o.tgl_selesai)', $today)
+            ->where('MONTH(o.tgl_selesai)', $month)
             ->group_by('d.layanan_id')
             ->get()
             ->result();

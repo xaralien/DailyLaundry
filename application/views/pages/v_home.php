@@ -144,12 +144,19 @@
             <div class="card card-lg">
                 <!--  card body -->
                 <div class="card-body d-flex flex-column gap-5">
-                    <div class="mb-4">
-                        <!-- heading -->
-                        <h5 class="mb-0">Penghasilan Berdasarkan Diambil</h5>
-                        <span>Debit : Sudah dibayar</span>
-                        <br>
-                        <span>Kredit : Belum dibayar</span>
+                    <div class="mb-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">Penghasilan Berdasarkan Diambil</h5>
+                            <span>Debit : Sudah dibayar</span><br>
+                            <span>Kredit : Belum dibayar</span>
+                        </div>
+                        <select id="selectTahun" class="form-select w-auto">
+                            <?php foreach ($available_years as $y): ?>
+                                <option value="<?= $y ?>" <?= $y == $selected_year ? 'selected' : '' ?>>
+                                    <?= $y ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="bg-gray-100 p-3 rounded-3">
                         <ul class="nav nav-pills-white nav-fill" id="chartTabs" role="tablist">
@@ -167,7 +174,9 @@
                                                         d="M7 3.34a10 10 0 1 1 -4.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 4.995 -8.336z" />
                                                 </svg></span><span>Total Debit</span>
                                         </span>
-                                        <span class="text-start fs-3 fw-semibold mt-2">Rp. <?= number_format($debit, 0, ',', '.') ?></span>
+                                        <span class="text-start fs-3 fw-semibold mt-2" id="debit-value">
+                                            Rp. <?= number_format($debit, 0, ',', '.') ?>
+                                        </span>
                                     </span>
                                 </button>
                             </li>
@@ -184,7 +193,9 @@
                                                         d="M7 3.34a10 10 0 1 1 -4.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 4.995 -8.336z" />
                                                 </svg></span><span>Total Credit</span>
                                         </span>
-                                        <span class="text-start fs-3 fw-semibold mt-2">Rp. <?= number_format($credit, 0, ',', '.') ?></span>
+                                        <span class="text-start fs-3 fw-semibold mt-2" id="credit-value">
+                                            Rp. <?= number_format($credit, 0, ',', '.') ?>
+                                        </span>
                                     </span>
                                 </button>
                             </li>
@@ -209,7 +220,7 @@
                 <!-- card body -->
                 <div class="card-body">
                     <!-- heading -->
-                    <h5 class="mb-6">Layanan</h5>
+                    <h5 class="mb-6">Layanan Per Bulan</h5>
                     <?php if (empty($layanan)): ?>
                         <div class="d-flex flex-column align-items-center justify-content-center py-5 text-muted">
                             <i class="ti ti-wash-machine mb-2" style="font-size: 2.5rem; opacity: 0.3;"></i>
@@ -527,6 +538,29 @@
     var kreditData = <?= $chart_kredit ?>;
     var layananLabel = <?= $chart_layanan_label ?>;
     var layananSeries = <?= $chart_layanan_series ?>;
+    var incomeChart, kreditChart;
+
+    document.getElementById('selectTahun').addEventListener('change', function() {
+        var year = this.value;
+
+        fetch('<?= base_url('home/get_chart_by_year') ?>?year=' + year)
+            .then(res => res.json())
+            .then(function(data) {
+                // Update chart
+                incomeChart.updateSeries([{
+                    data: data.income
+                }]);
+                kreditChart.updateSeries([{
+                    data: data.kredit
+                }]);
+
+                // Update nilai debit & kredit di tab
+                document.querySelector('#debit-value').textContent =
+                    'Rp. ' + parseInt(data.debit).toLocaleString('id-ID');
+                document.querySelector('#credit-value').textContent =
+                    'Rp. ' + parseInt(data.credit).toLocaleString('id-ID');
+            });
+    });
 
     var theme = {
         primary: 'var(--ds-primary)',
