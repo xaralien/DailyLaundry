@@ -82,7 +82,7 @@ class Laundry extends CI_Controller
 				'<span style="min-width:80px;display:inline-block" title="Rp ' . number_format($r->harga, 0, ',', '.') . '">' . 'Rp ' . round($r->harga / 1000) . 'k</span>',
 				'<span style="min-width:80px;display:inline-block" title="Rp ' . number_format($r->debit, 0, ',', '.') . '">' . 'Rp ' . round($r->debit / 1000) . 'k</span>',
 				$r->kredit > 0
-					? '<span style="min-width:80px;display:inline-block" class="btn btn-sm btn-outline-danger" title="Rp ' . number_format($r->kredit, 0, ',', '.') . '">' . 'Rp ' . round($r->kredit / 1000) . 'k</span>'
+					? '<span style="min-width:80px;display:inline-block" class="btn btn-sm btn-outline-danger" onclick="editOrder(' . $r->id . ')" title="Rp ' . number_format($r->kredit, 0, ',', '.') . '">' . 'Rp ' . round($r->kredit / 1000) . 'k</span>'
 					: '<span style="min-width:80px;display:inline-block" class="btn btn-sm btn-outline-success" title="LUNAS">LUNAS</span>',
 				$delivery,
 				"<span class='badge {$statusClass}'>" . ucwords(str_replace('_', ' ', $r->status)) . "</span>",
