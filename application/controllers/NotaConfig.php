@@ -32,6 +32,7 @@ class NotaConfig extends CI_Controller
 			'use_year'   => $this->input->post('use_year')  ?? 0,
 			'use_month'  => $this->input->post('use_month') ?? 0,
 			'padding'    => $this->input->post('padding'),
+			'batch'      => $this->input->post('batch'),
 			'counter'    => $this->input->post('counter'),
 			'auto_reset' => $this->input->post('auto_reset'),
 		];

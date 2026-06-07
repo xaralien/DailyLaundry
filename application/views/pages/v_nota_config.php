@@ -48,8 +48,11 @@
                             <label class="form-label">Panjang Angka <small class="text-muted">(padding, contoh: 5 = 00001)</small></label>
                             <input type="number" class="form-control" id="cfgPadding" value="<?= $config->padding ?>" min="1" max="10">
                         </div>
-
-                        <div class="col-md-6">
+                        <div class="col-md-3">
+                            <label class="form-label">Pengulangan Saat Ini</label>
+                            <input type="number" class="form-control" id="cfgBatch" value="<?= $config->batch ?>" min="1">
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label">Counter Saat Ini</label>
                             <input type="number" class="form-control" id="cfgCounter" value="<?= $config->counter ?>" min="1">
                         </div>
@@ -69,6 +72,7 @@
                                 <?= $config->prefix . $config->sep ?>
                                 <?= $config->use_year  ? date('Y') . $config->sep : '' ?>
                                 <?= $config->use_month ? date('m') . $config->sep : '' ?>
+                                <?= $config->batch . $config->sep ?>
                                 <?= str_pad($config->counter, $config->padding, '0', STR_PAD_LEFT) ?>
                             </div>
                         </div>
@@ -134,6 +138,7 @@
             const useYear = $('#cfgUseYear').val() == '1';
             const useMonth = $('#cfgUseMonth').val() == '1';
             const padding = parseInt($('#cfgPadding').val()) || 5;
+            const batch = parseInt($('#cfgBatch').val()) || 1;
             const counter = parseInt($('#cfgCounter').val()) || 1;
 
             const now = new Date();
@@ -145,13 +150,13 @@
             if (prefix) preview += sep;
             if (useYear) preview += year + sep;
             if (useMonth) preview += month + sep;
-            preview += num;
+            preview += batch + sep + num;
 
             $('#previewNota').text(preview);
         }
 
         // Trigger preview saat ada perubahan
-        $('#cfgPrefix, #cfgSep, #cfgUseYear, #cfgUseMonth, #cfgPadding, #cfgCounter').on('input change', updatePreview);
+        $('#cfgPrefix, #cfgSep, #cfgUseYear, #cfgUseMonth, #cfgPadding, #cfgBatch, #cfgCounter').on('input change', updatePreview);
 
         // Simpan
         $('#btnSimpanConfig').on('click', function() {
@@ -183,6 +188,7 @@
                         use_year: $('#cfgUseYear').val(),
                         use_month: $('#cfgUseMonth').val(),
                         padding: $('#cfgPadding').val(),
+                        batch: $('#cfgBatch').val(),
                         counter: $('#cfgCounter').val(),
                         auto_reset: $('#cfgAutoReset').val(),
                     },
