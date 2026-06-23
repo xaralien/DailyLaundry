@@ -35,6 +35,7 @@ class NotaConfigModel extends CI_Model
         if ($config['use_month']) {
             $nota .= date('m') . $config['sep'];
         }
+        $nota .= $config['batch'] . $config['sep'];
 
         $nota .= str_pad($config['counter'], $config['padding'], '0', STR_PAD_LEFT);
 
